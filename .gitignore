@@ -23,9 +23,11 @@ dist-ssr
 *.sln
 *.sw?
 b1hybrid
+.env
 .env.local
 .env.*.local
 
 # One lockfile only: this project uses pnpm (see package.json packageManager).
 package-lock.json
 yarn.lock
+
