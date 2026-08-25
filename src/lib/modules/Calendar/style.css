@@ -1,0 +1,1030 @@
+.calendarwidget{
+  position: relative;
+  /*box-shadow: 0 0 2px 2px rgba(0,0,0,0.1);*/
+}
+
+.todaypanel{
+  width: 120px;
+  padding-right: 8px;
+  overflow: hidden;
+}
+
+.calendarpanel{
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.monthline{
+  height: 24px;
+  font-size: 18px;
+  font-weight: bold;
+  text-align: right;
+  color: #4F4F4F;
+  padding-right: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.dayline,
+.daynameline{
+  display: flex;
+  flex-direction: row;
+  text-align: center;
+}
+
+.dayline > div,
+.daynameline > div{
+  flex: 1;
+}
+
+.dayline > div:nth-child(5),
+.daynameline > div:nth-child(5){
+  color: #00cccc;
+}
+
+.dayline > div:nth-child(6),
+.daynameline > div:nth-child(6){
+  color: #92cc00;
+}
+
+.dayline > div:nth-child(1), .daynameline > div:nth-child(1){ color: #1b5e20; }
+.dayline > div:nth-child(2), .daynameline > div:nth-child(2){ color: #006064; }
+.dayline > div:nth-child(3), .daynameline > div:nth-child(3){ color: #1a237e; }
+.dayline > div:nth-child(4), .daynameline > div:nth-child(4){ color: #311b92; }
+.dayline > div:nth-child(5), .daynameline > div:nth-child(5){ color: #4a148c; }
+.dayline > div:nth-child(6), .daynameline > div:nth-child(6){ color: #880e4f; }
+.dayline > div:nth-child(7), .daynameline > div:nth-child(7){ color: #b71c1c; }
+
+.dayline > div{
+  font-size: 14px;
+  line-height: 1.5;
+  position: relative;
+}
+
+.dayline > div.buddha{
+  background-image: url(ic_buddha.svg);
+  background-position: center right 1px;
+  background-size: 7px auto;
+  background-repeat: no-repeat;
+}
+
+.dayline .belieficon{
+  position: absolute;
+  left: 12px;
+  top: 7px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.dayline .belieficon.bad{
+  background-color: #ef9a9a;
+}
+
+.dayline .belieficon.good{
+  background-color: #b2ff59;
+}
+
+.dayline .belieficon.good.bad::after{
+  content: "";
+  position: absolute;
+  left: 50%;
+  width: 50%;
+  height: 100%;
+  background: #ef9a9a;
+}
+
+.dayline > div.goodday{
+  background-color: #ffe;
+}
+
+.daynameline > div{
+  line-height: 20px;
+  font-size: 11px;
+  font-weight: bold;
+}
+
+.daylinelist{
+  flex: 1;
+}
+
+.selected{
+  background-color: #eee;
+}
+
+.holiday{
+  font-weight: bold;
+  color: #b71c1c !important;
+}
+
+.eventday{
+  font-weight: bold;
+}
+
+.calendarbuttonpanel{
+  display: flex;
+  justify-content: space-between;
+  padding-top: 8px;
+  padding-bottom: 4px;
+  margin-top: auto;
+}
+
+.calendarbuttonpanel > div{
+  padding: 0 12px;
+  border-radius: 12px;
+  border: solid 1px #cfd8dc;
+  line-height: 24px;
+  font-size: 11px;
+  background-color: #eceff1;
+  color: #455a64;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.calendarbuttonpanel .hidden{
+  visibility: hidden;
+}
+
+.gototoday{
+  margin-right: auto;
+}
+
+.calendar2022{
+  margin-right: auto;
+}
+
+.viewmonths, .calendar2022 {
+  background: rgb(183, 28, 28);
+  background: linear-gradient(270deg, rgba(183, 28, 28, 1) 0%, rgba(213, 0, 0, 1) 100%);
+  color: white !important;
+  border: none !important;
+}
+
+.minimizeCalendar{
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 20px;
+  height: 20px;
+  background: url(ic_minimize.svg) no-repeat;
+  background-size: cover;
+
+  @media (min-width: 768px) {
+    top: 8px;
+    left: 8px;
+  }
+
+}
+
+.smallcalendar .minimizeCalendar{
+  background-image: url(ic_maximize.svg);
+}
+
+.flex-row{
+  display: flex;
+  flex-direction: row;
+}
+
+.flex-column{
+  display: flex;
+  flex-direction: column;
+}
+
+.padding-8{
+  padding: 8px;
+  @media (min-width: 768px) {
+    padding: 16px;
+  }
+  @media (min-width: 960px) {
+    padding: 24px;
+  }
+}
+
+/* ################################ DETAIL ################################ */
+
+.smallcalendar > div{
+  padding: 8px 8px 8px 8px;
+  @media (min-width: 768px) {
+    padding: 16px;
+  }
+  @media (min-width: 960px) {
+    padding: 24px;
+  }
+}
+
+.smallcalendar .detailpanel{
+  display: flex;
+}
+
+.smallcalendar .bigmonthyear{
+  display: block;
+}
+
+.smallcalendar .biglaoday,
+.smallcalendar .biglaomonth,
+.smallcalendar .bigweekday,
+.smallcalendar .calendarpanel
+{
+  display: none
+}
+
+.smallcalendar .bigday{
+  font-size: 52px;
+}
+
+.smallcalendar .bigweekday{
+  font-size: 18px;
+}
+
+.smallcalendar .calendarbuttonpanel .hidden{
+  display: none;
+}
+
+.smallcalendar .banner_covid{
+  display: block;
+}
+
+.detailpanel{
+  flex: 1;
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.fulllaoday{
+  font-weight: bold;
+  font-size: 15px;
+  color: #37474f;
+}
+
+.fulllaomonth{
+  font-weight: bold;
+  font-size: 14px;
+  color: #37474f;
+}
+
+.detailpanel .bigholiday{
+  font-size: 14px;
+}
+
+/* ################################ TODAY ################################ */
+
+.bigday{
+  font-weight: normal;
+  font-size: 72px;
+  line-height: 1;
+  text-align: center;
+  color: #BD110F;
+  margin-top: -4px;
+}
+
+.bigday.buddha{
+  background: url(ic_buddha.svg) no-repeat top 8px right 2px;
+  background-size: 15px auto;
+}
+
+.bigmonthyear{
+  font-weight: bold;
+  font-size: 20px;
+  display: none;
+}
+
+.bigweekday{
+  font-style: normal;
+  font-weight: 600;
+  font-size: 20px;
+  line-height: 39px;
+  color: #4F4F4F;
+  margin-top: -8px;
+  white-space: nowrap;
+}
+
+.biglaoday{
+  font-weight: bold;
+  font-style: normal;
+  font-size: 18px;
+  line-height: 29px;
+  color: #4F4F4F;
+  white-space: nowrap;
+}
+
+.biglaomonth{
+  font-weight: bold;
+  font-style: normal;
+  font-size: 15px;
+  line-height: 20px;
+  margin-top: -4px;
+  color: #4F4F4F;
+  white-space: nowrap;
+}
+
+.othermonth{
+  opacity: 0.4;
+}
+
+.bigevent{
+  font-weight: bold;
+  font-size: 13px;
+  margin-top: 6px;
+  color: #b71c1c;
+  line-height: 1.3;
+  height: 2.6em;
+  overflow: hidden;
+}
+
+.dayline .today {
+  border: 1px solid #bb1111;
+  font-weight: 700;
+  border-radius: 4px;
+}
+
+.todaypanel .events {
+  display: none;
+}
+.todaypanel .events li {
+  font-weight: bold;
+  font-size: 9px;
+  margin-top: 8px;
+  color: #b71c1c;
+}
+
+/* ################################ MONTH POPUP ################################ */
+
+.monthpopup{
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  background-color: white;
+  z-index: 2;
+
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+
+  @media (min-width: 768px) {
+    width: 80%;
+  }
+}
+
+.monthtitle{
+  border-bottom: solid 1px #cfd8dc;
+  color: #fff;
+  background-color: #b71c1c;
+}
+
+.current-year-calendar-img{
+  @media (min-width: 768px) {
+    object-fit: contain;
+  }
+}
+
+.monthtitle h1{
+  line-height: 56px;
+  font-size: 1.1em;
+  text-align: center;
+}
+
+.backyear, .nextyear{
+  width: 24px;
+  height: 24px;
+  vertical-align: middle;
+}
+
+.closemonth{
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 56px;
+  height: 56px;
+  background: url(ic_close.svg) no-repeat center;
+  background-size: 24px;
+}
+
+.monthremark{
+  font-size: 10px;
+  padding: 0 2px 0 4px;
+  color: #607d8b;
+  border-top: solid 1px #eceff1;
+}
+
+.monthlist{
+  overflow: scroll;
+  padding: 0 8px;
+}
+
+.monthlist .dayline > div.buddha{
+  background-position: top 4px right 5px;
+  background-size: 9px auto;
+}
+
+.monthlist .daynameline > div{
+  font-size: 14px;
+}
+
+.monthlist .dayline > div{
+  font-size: 16px;
+  line-height: 1.1;
+  padding: 4px 2px 2px 2px;
+  overflow: hidden;
+}
+
+.monthlist.full .dayline > div{
+  padding: 2px 2px 1px 2px;
+}
+
+.monthlist .dayline > div > .laodayitem {
+  font-size: 12px;
+  opacity: 0.5;
+  white-space: nowrap;
+}
+
+.monthlist .coverimage {
+  display: none;
+}
+
+.monthlist.full .coverimage {
+  display: block;
+  width: 100%;
+  flex: 1;
+}
+
+.monthlist.full {
+  overflow: hidden;
+  position: relative;
+}
+
+.monthlist.full .monthitem {
+  height: 100%;
+  display: none;
+}
+
+.monthlist.full .monthitem.active {
+  display: flex;
+  flex-direction: column;
+}
+
+.monthlist.full .monthitem {
+  height: 100%;
+  display: none;
+}
+
+.monthlist.full .monthitem .fullmonthline {
+  line-height: 20px;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.monthlist.full .monthitem .fullmonthline span {
+  font-size: 18px;
+}
+
+.monthlist.full .daynameline > div {
+  font-size: 10px;
+}
+
+.monthlist.full .daylinelist {
+  flex: 0;
+}
+
+.monthlist.full .daylinelist .holidaylist > div {
+  font-size: 12px;
+}
+
+.monthlist.full .daylinelist .dayline > div {
+  font-size: 14px;
+}
+
+.monthlist.full .dayline > div > .laodayitem {
+  font-size: 12px;
+  margin-top: 0;
+}
+
+.calendar-nav {
+  height: 48px;
+  display: flex;
+  background-color: #b71c1c;
+  color: #ffffff;
+}
+
+.calendar-nav .backmonth {
+  background: url(ic_back_year.svg) no-repeat;
+  background-size: 24px;
+  background-position: 8px center;
+}
+
+.calendar-nav .nextmonth {
+  background: url(ic_next_year.svg) no-repeat;
+  background-size: 24px;
+  background-position: right 8px center;
+}
+
+.fullmonthline {
+  margin-top: 8px;
+  margin-bottom: 2px;
+  line-height: 32px;
+  font-size: 32px;
+  text-align: right;
+  color: #4F4F4F;
+  padding: 0 8px;
+  display: flex;
+  justify-content: space-between;
+  white-space: nowrap;
+}
+
+.fullmonthline span {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.monthlist.full .dayline > div {
+  font-size: 14px;
+}
+
+.smaller {
+  font-size: 0.7em;
+  font-weight: bold;
+}
+
+.holidaylist {
+  padding: 4px 0;
+}
+
+.holidaylist > div{
+  text-align: left;
+  margin: 4px 8px;
+  font-size: 13px;
+  color: #37474f;
+}
+
+.monthlist.full .holidaylist > div{
+  margin: 2px 8px;
+}
+
+.holidaylist span:nth-child(1){
+  text-align: left;
+  display: inline-block;
+  width: 24px;
+}
+
+.strong{
+  font-weight: bold;
+}
+
+.topshadow{
+  box-shadow: 0 0 16px rgba(0,0,0,0.3);
+}
+
+#checkin-panel{
+  position: relative;
+  display: flex;
+  height: 0;
+  padding-top: 16%;
+  background-image: url("login_top_banner.png");
+  background-repeat: no-repeat;
+  background-size: 100%;
+  color: white;
+  box-shadow: 0 0 4px 0 rgba(0,0,0,0.5);
+}
+
+#checkin-panel p{
+  line-height: 64px;
+  text-align: left;
+  margin-left: 64px;
+}
+
+#checkinbutton{
+  position: absolute;
+  top: 8px;
+  /*right: 8px;*/
+  bottom: 8px;
+  width: 86px;
+  line-height: 46px;
+  /*border: solid 1px #fcb3b3;*/
+  border-radius: 5px;
+  /*background: url(ic_checkin.svg) no-repeat 8px center, linear-gradient(270deg, rgb(159, 24, 24) 0%, rgb(234, 0, 0) 100%);*/
+  background-size: 24px, 100%;
+  padding-left: 36px;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/**
+* ================================================================================
+* NEW POPUP
+* ================================================================================
+**/
+
+.popupcontainer {
+  display: flex;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: rgba(69, 90, 100, .9);
+  padding: 32px;
+  z-index: 20;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.popup {
+  display: flex;
+  flex-direction: column;
+  background-color: white;
+  border-radius: 6px;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  max-height: 100%;
+  @media (min-width: 768px) {
+    margin-left: auto;
+    margin-right: auto;
+    width: 80%;
+  }
+}
+
+.selectitem{
+  height: 56px;
+  line-height: 56px;
+  border-bottom: solid 1px #CFD8DC;
+}
+
+.bold{
+  font-weight: bold;
+}
+
+.largenumber{
+  font-size: 1.2em;
+  font-weight: lighter;
+}
+
+.datelabel{
+  font-size: 0.7em;
+  font-weight: normal;
+}
+
+#selectbox {
+  animation: popup 0.25s ease-in;
+}
+
+#gooddaypopup .title{
+  font-weight: lighter;
+  font-size: 1.8em;
+  padding: 8px 16px 0 16px;
+  text-align: left;
+  color: white;
+}
+
+#gooddaypopup .subtitle{
+  font-weight: normal;
+  font-size: 1.2em;
+  padding: 0 16px 0 16px;
+  text-align: left;
+  color: #ffffffbb;
+}
+
+.holidayline{
+  font-size: 1em;
+  font-weight: bold;
+  color: white;
+  padding: 0 16px 4px 16px;
+  text-align: left;
+}
+
+.gooddaytitle{
+  font-size: 0.8em;
+  font-weight: bold;
+  color: #607d8b;
+  text-align: left;
+  padding: 4px 16px 0 16px;
+  flex: 1;
+}
+
+.gooddaycredit{
+  font-size: 0.7em;
+  color: #90a4ae;
+  text-align: right;
+  margin: 4px 16px 4px 0;
+}
+
+#gooddaylist li{
+  font-size: 1em;
+  text-align: left;
+  padding: 4px 16px;
+}
+
+#gooddaylist span{
+  background-color: #eceff1;
+  color: #607d8b;
+  font-size: 0.7em;
+  display: inline-block;
+  width: 40px;
+  border-radius: 8px;
+  padding: 2px 0;
+  text-align: center;
+  margin: 0 4px 0 0;
+}
+
+#gooddaylist .good{
+  background-color: #ccff90;
+  color: #2e7d32;
+}
+
+#gooddaylist .bad{
+  background-color: #ffebee;
+  color: #e53935;
+}
+
+#gooddaylist strong{
+  color: #37474f;
+}
+
+.laonamecontainer{
+  display: flex;
+  margin: 0 4px 4px 4px;
+}
+
+.laonameitem{
+  flex: 1;
+  margin: 4px;
+  background-color: #00000044;
+  border-radius: 4px;
+  padding: 2px 0;
+}
+
+.laonameitem h1{
+  font-size: 0.8em;
+  color: #ffffff77      ;
+}
+
+.laonameitem p{
+  color: white;
+}
+
+.nonglarp{
+  font-size: 0.8em;
+  padding: 0.15em 0;
+}
+
+@keyframes popup {
+  0% {
+    opacity: 0;
+    transform: scale(.8);
+  }
+  25% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes scaleDown {
+  100% {
+    opacity: 0;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.3;
+  }
+  25% {
+    opacity: 0.7;
+    transform: scale(1.02);
+  }
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes fade-in {
+  100% {
+    background: rgba(69, 90, 100, .9)
+  }
+  50% {
+    background: rgba(69, 90, 100, .7)
+  }
+  25% {
+    background: rgba(69, 90, 100, .2)
+  }
+  0% {
+    background: rgba(69, 90, 100, 0)
+  }
+}
+
+
+@keyframes fade {
+  0% {
+    background: rgba(69, 90, 100, .9)
+  }
+  50% {
+    background: rgba(69, 90, 100, .7)
+  }
+
+  100% {
+    background: rgba(69, 90, 100, 0)
+  }
+
+}
+
+
+/*------------ TipMe QR code -------------------*/
+#qrbox {
+  position: absolute;
+  width: 6rem;
+  height: 6rem;
+  border: solid 3px #bb1111;
+  overflow: hidden;
+  border-radius: 7rem;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-top: -0.5rem;
+  z-index: 6;
+}
+
+@-webkit-keyframes expand {
+  from {
+    position: fixed;
+    width: 6rem;
+    height: 6rem;
+    border-radius: 7rem;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: -0.5rem;
+    z-index: 5;
+  }
+  to {
+    position: fixed;
+    width: 17rem;
+    height: 17rem;
+    border-radius: 17rem;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: 1rem;
+    z-index: 5;
+  }
+}
+
+@-webkit-keyframes concise {
+  from {
+    position: fixed;
+    width: 17rem;
+    height: 17rem;
+    border-radius: 17rem;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: 1rem;
+    z-index: 5;
+  }
+  to {
+    position: fixed;
+    width: 6rem;
+    height: 6rem;
+    border-radius: 7rem;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: -0.5rem;
+    z-index: 5;
+  }
+}
+
+.zoomInAnimation {
+  -webkit-animation-name: expand;
+  -webkit-animation-duration: 1.5s;
+  -webkit-animation-fill-mode: forwards;
+}
+
+.zoomOutAnimation {
+  -webkit-animation-name: concise;
+  -webkit-animation-duration: 1.5s;
+  -webkit-animation-fill-mode: forwards;
+}
+
+img#profile {
+  width: 34%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+}
+
+#tipmeqr canvas {
+  width: 75%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+}
+
+.hideQrAnimation {
+  -webkit-animation-name: hideqr;
+  -webkit-animation-duration: 5s;
+  -webkit-animation-fill-mode: forwards;
+}
+@keyframes hideqr {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+#bgqr canvas {
+  width: 120%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 0;
+}
+
+#bg-blur {
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  top: 0px;
+  background-color: white;
+  z-index: 2;
+  opacity: 0.7;
+}
+
+/*--------------------------------------------*/
+
+div.aura {
+  position: absolute;
+  width: 7rem;
+  height: 7rem;
+  border: solid 3px crimson;
+  border-radius: 7rem;
+  margin-top: -0.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.animatedAuraexpand {
+  animation-name: auraexpand;
+  animation-duration: 3s;
+  animation-iteration-count: infinite;
+  transition-timing-function: ease-out;
+}
+
+@keyframes auraexpand {
+  0% {
+    position: absolute;
+    width: 7rem;
+    height: 7rem;
+    border: solid 3px crimson;
+    border-radius: 7rem;
+    top: 1rem;
+    left: 50%;
+    transform: translateX(-50%) scale(1);
+    filter: blur(0);
+    opacity: 0.6;
+  }
+  50% {
+    position: absolute;
+    width: 7rem;
+    height: 7rem;
+    border: solid 3px crimson;
+    border-radius: 7rem;
+    top: 1rem;
+    left: 50%;
+    transform: translateX(-50%) scale(1.1);
+    filter: blur(0.1rem);
+    opacity: 0;
+  }
+  100% {
+    position: absolute;
+    width: 7rem;
+    height: 7rem;
+    border: solid 3px crimson;
+    border-radius: 7rem;
+    top: 1rem;
+    left: 50%;
+    transform: translateX(-50%) scale(1.1);
+    filter: blur(0.1rem);
+    opacity: 0;
+  }
+}
+
+.monthtitle h1{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

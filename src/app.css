@@ -1,0 +1,203 @@
+@import 'tailwindcss';
+
+@plugin '@tailwindcss/forms';
+
+/*
+ * The design tokens, ported from the Tailwind 3 `tailwind.config.js` this file
+ * replaced. Tailwind 4 reads its theme from CSS, so this is now the one place
+ * a colour or breakpoint is defined.
+ */
+/*
+ * Shipped with the app rather than fetched: this is the only face that renders
+ * Lao script correctly, and a fallback flash on the login screen is very
+ * visible. One variable file covers the whole 100-900 range.
+ */
+@font-face {
+  font-family: 'Noto Sans Lao Looped';
+  src: url('/font-notosanslaolooped.woff2') format('woff2-variations');
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+@theme {
+  /* The four breakpoints *replace* Tailwind's defaults rather than extending
+     them: `sm:`/`md:`/`lg:`/`xl:` are deliberately unavailable, and nothing in
+     `src/` uses them. Clearing the namespace first is what makes that true. */
+  --breakpoint-*: initial;
+  --breakpoint-mobile: 640px;
+  --breakpoint-tablet: 768px;
+  --breakpoint-laptop: 960px;
+  --breakpoint-desktop: 1280px;
+
+  --color-onebank-white: #ffffff;
+  --color-onebank-red: #b11111;
+  --color-onebank-light-red: #ff4f49;
+  --color-onebank-dark-red: #9e0d0d;
+  --color-onebank-grey: #424242;
+  --color-onebank-grey-2: #9e9e9e;
+  --color-onebank-grey-3: #424242;
+  --color-onebank-light-grey: #f5f5f5;
+  --color-onebank-light-grey-2: #eeeeee;
+  --color-onebank-light-grey-3: #616161;
+  --color-onebank-light-grey-4: #d9d9d9;
+  --color-onebank-black: #000000;
+  --color-onebank-green: #4caf50;
+  --color-onebank-ghost-white: #f4f4f4;
+  --color-onebank-base-50: #ffffff;
+  --color-onebank-base-100: #f9fafb; /* Page background */
+  --color-onebank-base-200: #ebedf0; /* Button background */
+  --color-onebank-kid-positive: #03a9f4;
+
+  /* Harvested HOME components use these three: `accent` for the Edit / See-all
+     links, `positive`/`negative` for credit and debit amounts. */
+  --color-accent: #1d4ed8;
+  --color-positive: #00c853;
+  --color-negative: #d50000;
+
+  /* The base-* scale. onebank-ui maps these to var(--base-*) which is never
+     defined there, so every `bg-base-100` is silently dropped in that repo.
+     Wired here to the neutral ramp its own config records as a comment. */
+  --color-base-50: #f9fafb;
+  --color-base-100: #f3f4f6;
+  --color-base-200: #e5e7eb;
+  --color-base-300: #d1d5db;
+  --color-base-400: #9ca3af;
+  --color-base-500: #6b7280;
+  --color-base-600: #4b5563;
+  --color-base-700: #374151;
+  --color-base-800: #1f2937;
+  --color-base-900: #111827;
+  --color-base-950: #030712;
+
+  --shadow-onebank: 0px 1px 12px 0px rgba(255, 82, 82, 0.15);
+
+  /* The OneBank radius scale. `ob-md` is the default for cards and inputs. */
+  --radius-ob-sm: 10px;
+  --radius-ob-md: 12px;
+  --radius-ob-lg: 16px;
+
+  /* Noto Sans Lao Looped is the brand face and the only one that renders Lao
+     correctly at small sizes. It is also the default sans, so unstyled text
+     picks it up without a `font-ob` on every element. */
+  --font-ob: 'Noto Sans Lao Looped', sans-serif;
+  --font-sans: 'Noto Sans Lao Looped', sans-serif;
+}
+
+/* The brand gradient, as a class because it is used on backgrounds Tailwind has
+   no token namespace for. Matches `--color-onebank-light-red` -> `-red` -> `-dark-red`. */
+.ob-gradient {
+  background-image: linear-gradient(135deg, #ff4f49 0%, #b11111 50%, #9e0d0d 100%);
+}
+
+*{
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+html,
+body,
+#app {
+  @apply relative flex h-full w-full flex-col overflow-hidden bg-onebank-base-100;
+
+}
+
+#framecontainer {
+  width: 100%;
+  height: 100%;
+}
+
+iframe {
+  border: none;
+  background-color: white;
+  width: 100%;
+  height: 100%;
+}
+
+@media (min-width: 420px) {
+  #framecontainer {
+    background-color: #333;
+    text-align: center;
+    height: 100%;
+  }
+
+  #framecontainer.mobile {
+    padding-top: 40px;
+  }
+
+  iframe.mobile {
+    width: 411px;
+    height: 731px;
+  }
+
+  iframe.desktop {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.onebank-card {
+  @apply rounded-xl border-t border-t-gray-100 bg-onebank-base-50 p-2 shadow;
+  width: 100%;
+}
+
+
+.onebank-primary-btn {
+  @apply inline-flex w-full items-center justify-center rounded-lg bg-onebank-red px-4 py-3 text-sm font-medium text-white hover:bg-red-600 active:bg-red-700 disabled:cursor-not-allowed disabled:bg-onebank-red/50 disabled:hover:bg-onebank-red/50 tablet:min-w-fit  tablet:max-w-[200px];
+}
+
+.onebank-secondary-btn {
+  @apply inline-flex w-full items-center justify-center rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-sm  hover:bg-gray-50 active:bg-gray-100 disabled:cursor-not-allowed disabled:border-gray-100 disabled:bg-gray-100 disabled:text-gray-400 disabled:hover:bg-gray-100 tablet:min-w-fit tablet:max-w-[200px];
+}
+
+/* Shared classes harvested components rely on (ported from onebank-ui app.scss). */
+
+.card {
+  @apply rounded-lg bg-white drop-shadow;
+}
+
+.badge {
+  @apply rounded bg-gray-100 px-2 py-0.5 text-xs font-medium laptop:text-[13px];
+}
+
+.badge.alias {
+  @apply bg-purple-100 text-purple-600;
+}
+
+.badge.Locked {
+  @apply bg-red-100 text-red-600;
+}
+
+.badge.Active {
+  @apply bg-green-100 text-green-600;
+}
+
+.disabled-icon {
+  @apply pointer-events-none cursor-not-allowed opacity-50;
+}
+
+/* Carbon Charts overrides, ported from onebank-ui's app.scss. The library ships
+   its own layout; these reclaim space the donut legend would otherwise take and
+   tone down its axis labels. */
+
+.legend-item .checkbox {
+  --chkfg: none;
+  box-shadow: none !important;
+}
+
+.value-container {
+  @apply justify-center;
+}
+
+.layout-child:first-child.legend {
+  overflow-y: auto !important;
+  width: 40% !important;
+}
+
+.layout-child:nth-child(3).graph-frame {
+  width: 70% !important;
+}
+
+.cds--cc--chart-wrapper text:nth-child(2) {
+  @apply fill-gray-400!;
+}

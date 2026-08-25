@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 288 288">
+  <defs>
+    <style>
+      .cls-1 {
+        stroke-linecap: square;
+      }
+
+      .cls-1, .cls-2 {
+        stroke: #133d6b;
+      }
+
+      .cls-1, .cls-2, .cls-3, .cls-4 {
+        fill: none;
+      }
+
+      .cls-1, .cls-2, .cls-4 {
+        stroke-miterlimit: 10;
+        stroke-width: 10px;
+      }
+
+      .cls-3 {
+        stroke-width: 0px;
+      }
+
+      .cls-5 {
+        clip-path: url(#clippath);
+      }
+
+      .cls-4 {
+        stroke: #dd2319;
+      }
+    </style>
+    <clipPath id="clippath">
+      <rect class="cls-3" x="0" width="288" height="288"/>
+    </clipPath>
+  </defs>
+  <g class="cls-5">
+    <polyline class="cls-1" points="144 63 153 63 198 63 198 117"/>
+    <polyline class="cls-1" points="81 63 72 63 27 63 27 261 144 261"/>
+    <circle class="cls-4" cx="198" cy="198" r="63"/>
+    <polyline class="cls-4" points="198 153 198 194.2778346383 225 225"/>
+    <path class="cls-2" d="M144,58.5v40.5h-63v-40.5c0-17.4000244141,14.1000976562-31.5,31.5-31.5,8.6999511719,0,16.580078125,3.5199584961,22.2800292969,9.2199707031s9.2199707031,13.5800170898,9.2199707031,22.2800292969Z"/>
+    <circle class="cls-2" cx="112.5" cy="58.5" r="13.5"/>
+  </g>
+</svg>
