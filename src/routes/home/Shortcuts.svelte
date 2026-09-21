@@ -1,15 +1,8 @@
 <script lang="ts">
     /**
-     * The user's shortcut row: up to ten menus as cards, plus an "add" tile.
-     *
-     * Harvested from onebank-ui `pages/HOME/components/Shortcuts.svelte`. That
-     * file rebuilds the launch parameter bundle itself — one of four copies in
-     * that repo that have already drifted apart — so this calls `openMenu`,
-     * which builds it once. Its "add" tile pushed the in-page step router to
-     * `CUSTOMIZE`; here it is a callback, so the route owns the modal.
+     * The user's shortcut tiles — up to ten, six to a row at full width — and
+     * the translucent "add shortcut" tile after them, which opens the picker.
      */
-    import Icon from '@iconify/svelte';
-    import MenuIcon from './MenuIcon.svelte';
     import {menus} from '../../lib/menus';
     import {sortSelected} from './quickAccess';
     import {isUsable, openMenu} from './openMenu';
@@ -27,24 +20,18 @@
     );
 </script>
 
-<div class="onebank-card flex h-full flex-col">
-    <div class="flex flex-wrap items-start gap-2 overflow-y-auto">
-        {#if visible.length === 0}
-            <div class="flex h-full w-full items-center justify-center py-2 text-gray-500">
-                {t('No quick access menu', 'ບໍ່ມີເມນູລັດ')}
-            </div>
-        {/if}
-        {#each visible as name (name)}
-            <div class="flex min-w-28 max-w-32 flex-col items-center justify-center rounded-lg border border-gray-100">
-                <MenuIcon menu={menus[name]} large onclick={() => openMenu(name)}/>
-            </div>
-        {/each}
-        <button
-                class="flex min-w-28 max-w-32 flex-col items-center justify-center rounded-lg border border-dashed border-gray-200 p-2 text-gray-400 transition hover:bg-gray-50"
-                onclick={onAdd}
-        >
-            <Icon icon="mdi:plus" class="h-12 w-12 tablet:h-14 tablet:w-14"/>
-            <span class="text-center text-xs font-medium tablet:text-sm">{t('Add shortcut', 'ເພີ່ມຟັງຊັ່ນລັດ')}</span>
+<section aria-label={t('Shortcuts', 'ຟັງຊັ່ນລັດ')}
+         class="grid grid-cols-3 gap-3 mobile:grid-cols-4 tablet:grid-cols-6">
+    {#each visible as name (name)}
+        <button type="button" onclick={() => openMenu(name)}
+                class="ob-card flex h-[146px] flex-col items-center justify-center gap-3 px-2 text-center transition-transform hover:-translate-y-0.5">
+            <img src="img/{menus[name].filename}" alt="" class="h-14 w-14 object-contain"/>
+            <span class="text-base leading-tight">{menus[name].name}</span>
         </button>
-    </div>
-</div>
+    {/each}
+    <button type="button" onclick={onAdd}
+            class="flex h-[146px] flex-col items-center justify-center gap-3 rounded-ob-xl bg-white/70 px-2 text-center text-lg transition-colors hover:bg-white">
+        <img src="img/ob/ic-plus.svg" alt="" class="h-10 w-10"/>
+        {t('Add shortcut', 'ເພີ່ມຟັງຊັ່ນລັດ')}
+    </button>
+</section>

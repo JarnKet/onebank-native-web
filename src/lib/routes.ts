@@ -1,74 +1,95 @@
 /**
- * The route table for the corporate OneBank pages.
+ * The route table: every screen in the app, and what points at it.
  *
- * Phase 1 puts every page on a real URL while its content is still an iframe.
- * As a page is migrated it swaps `component` from `IframePage` to the native
- * Svelte route — the path, the sidebar wiring and the deep link do not change.
+ * Every route is a native Svelte page — there are no iframes any more.
+ * `src/routes/index.ts` maps each path to its component; this file is the part
+ * the rest of the app reasons about without importing a component:
  *
- * `page` is the legacy page name the rest of the app still speaks (`ROLE.html`),
- * which is what `buildPopupUrl` needs and what embedded frames ask for by name.
+ * - `menu` is the sidebar entry to highlight while the route is active.
+ * - `menuKeys` are the registry keys (`src/lib/menus.ts`) a home tile opens
+ *   this route for. A key no route claims opens the "coming soon" page, which
+ *   is how the dozens of BCEL One services without a design still go somewhere.
  */
 
 import type { SidebarMenuTitle } from '../definition'
 
 export interface RouteDefinition {
-  /** Hash path, e.g. `/transaction`. */
+  /** Hash path, e.g. `/statement`. May carry `:param` segments. */
   path: string
-  /** Legacy page name, e.g. `TRANSACTION.html`. */
-  page: string
-  /** Sidebar entry to highlight while this route is active. */
-  menu: SidebarMenuTitle
+  /** Sidebar entry to highlight while this route is active, if any. */
+  menu: SidebarMenuTitle | null
+  /** Menu registry keys whose tile opens this route. */
+  menuKeys?: string[]
   /**
-   * True once the route renders a native component instead of an iframe.
-   * `src/routes/index.ts` reads this to decide what to mount, so flipping it —
-   * and adding the component — is the whole of migrating a page.
+   * Drawn without the group/nav column, as the design draws the group
+   * management screens: they are about *which* group, not inside one.
    */
-  native: boolean
+  fullWidth?: boolean
 }
 
 export const HOME_PATH = '/'
+export const COMING_SOON_PATH = '/service/:key'
 
 export const routeDefinitions: RouteDefinition[] = [
-  { path: HOME_PATH, page: '', menu: 'HOME', native: true },
-  { path: '/transaction', page: 'TRANSACTION.html', menu: 'TRANSACTION', native: false },
-  { path: '/authorization', page: 'AUTHORIZATION.html', menu: 'AUTHORIZATION', native: false },
-  { path: '/role', page: 'ROLE.html', menu: 'ROLE', native: false },
-  { path: '/account', page: 'ACCOUNT.html', menu: 'ACCOUNT', native: true },
-  { path: '/member', page: 'MEMBER.html', menu: 'MEMBER', native: false },
-  { path: '/group', page: 'GROUP.html', menu: 'GROUP', native: true },
-  { path: '/group-management', page: 'GROUPMANAGEMENT.html', menu: 'GROUP', native: false },
-  { path: '/register', page: 'REGISTERONEBANK.html', menu: 'GROUP', native: false },
+  { path: HOME_PATH, menu: 'HOME', menuKeys: ['HOME', 'DASHBOARD'] },
+  { path: '/messages', menu: 'MESSAGE', menuKeys: ['MESSAGE', 'TRANSACTION'] },
+  { path: '/messages/:id', menu: 'MESSAGE' },
+  { path: '/authorization', menu: 'AUTHORIZATION', menuKeys: ['AUTHORIZATION'] },
+  { path: '/authorization/history', menu: 'AUTHORIZATION' },
+  { path: '/role', menu: 'ROLE', menuKeys: ['ROLE'] },
+  { path: '/account', menu: 'ACCOUNT', menuKeys: ['ACCOUNT', 'ADDACCOUNT', 'OPENNEWACCOUNT'] },
+  { path: '/member', menu: 'MEMBER', menuKeys: ['MEMBER'] },
+  { path: '/group', menu: 'GROUP', menuKeys: ['GROUP', 'MODIFYOBPROFILE'] },
+  { path: '/group/leave', menu: null, fullWidth: true },
+  { path: '/group/join', menu: null, fullWidth: true },
+  { path: '/register', menu: null, menuKeys: ['REGISTERONEBANK', 'GROUPMANAGEMENT'], fullWidth: true },
+  { path: '/statement', menu: null, menuKeys: ['STATEMENT', 'ONEBANKSTATEMENT', 'HISTORY'] },
+  { path: '/transfer', menu: null, menuKeys: ['TRANSFER', 'ONEBANKTRANSFER', 'MYACCOUNTTRANSFER'] },
+  { path: '/transfer/interbank', menu: null, menuKeys: ['IBANKINTERNATIONALTRANSFER', 'SWIFTTRANSFER'] },
+  { path: '/transfer/idcard', menu: null, menuKeys: ['IBANKTRANFERIDCARD'] },
+  { path: '/salary', menu: null, menuKeys: ['IBANKSALARY'] },
+  { path: '/echeque', menu: null, menuKeys: ['ECHEQUE'] },
+  { path: '/bill/electricity', menu: null, menuKeys: ['ELECTRICITY', 'ONEBANKELECTRICITY'] },
+  { path: '/bill/water', menu: null, menuKeys: ['WATER', 'ONEBANKWATER'] },
+  { path: '/topup', menu: null, menuKeys: ['PHONE', 'ONEBANKPHONE', 'ONEBANKUTILITIES'] },
+  { path: COMING_SOON_PATH, menu: null },
 ]
 
-const byPage = new Map(routeDefinitions.filter((r) => r.page).map((r) => [r.page.toUpperCase(), r]))
-const byPath = new Map(routeDefinitions.map((r) => [r.path, r]))
-// First definition wins. Three routes carry `menu: 'GROUP'` — `/group`,
-// `/group-management` and `/register` — and building this from pairs kept the
-// *last*, so the sidebar's Group entry navigated to REGISTERONEBANK. The table
-// lists the entry's real destination first.
+/** `/messages/:id` -> a regex that matches `/messages/M3`. */
+function matcher(path: string): RegExp {
+  const pattern = path.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\/:[^/]+/g, '/[^/]+')
+  return new RegExp(`^${pattern}$`)
+}
+
+const compiled = routeDefinitions.map((definition) => ({ definition, regex: matcher(definition.path) }))
+
+const byMenuKey = new Map<string, RouteDefinition>()
+for (const definition of routeDefinitions) {
+  for (const key of definition.menuKeys ?? []) byMenuKey.set(key, definition)
+}
+
+// First definition wins, so a sidebar entry goes to its main page rather than
+// to a sub-page that shares its highlight (`/messages`, not `/messages/:id`).
 const byMenu = new Map<SidebarMenuTitle, RouteDefinition>()
 for (const definition of routeDefinitions) {
-  if (!byMenu.has(definition.menu)) byMenu.set(definition.menu, definition)
+  if (definition.menu && !byMenu.has(definition.menu)) byMenu.set(definition.menu, definition)
 }
 
-/** The route that owns a legacy page name, if this app routes it at all. */
-export function routeForPage(pagename: string): RouteDefinition | undefined {
-  return byPage.get(pagename.toUpperCase())
-}
-
+/** The route a concrete path belongs to, parameters included. */
 export function routeForPath(path: string): RouteDefinition | undefined {
-  return byPath.get(path)
+  return compiled.find(({ regex }) => regex.test(path))?.definition
 }
 
 export function routeForMenu(menu: SidebarMenuTitle): RouteDefinition | undefined {
   return byMenu.get(menu)
 }
 
-/**
- * True when this app owns the page as a route. Pages we do not own — every
- * b1hybrid page, and the onebank-ui pages still out of scope — open as iframe
- * overlays instead.
- */
-export function isRoutedPage(pagename: string): boolean {
-  return routeForPage(pagename) !== undefined
+/** Where a home tile for `menuKey` goes: its route, or the coming-soon page. */
+export function pathForMenuKey(menuKey: string): string {
+  return byMenuKey.get(menuKey)?.path ?? COMING_SOON_PATH.replace(':key', encodeURIComponent(menuKey))
+}
+
+/** True when `menuKey` has a real screen rather than the coming-soon page. */
+export function hasScreen(menuKey: string): boolean {
+  return byMenuKey.has(menuKey)
 }

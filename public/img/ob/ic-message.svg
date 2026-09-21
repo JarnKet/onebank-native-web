@@ -1,0 +1,11 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="ooui:message" clip-path="url(#clip0_0_109)">
+<path id="Vector" d="M0 9.6V19.2C0 19.8365 0.252856 20.447 0.702944 20.8971C1.15303 21.3471 1.76348 21.6 2.4 21.6H21.6C22.2365 21.6 22.847 21.3471 23.2971 20.8971C23.7471 20.447 24 19.8365 24 19.2V9.6L12 14.4L0 9.6Z" fill="black"/>
+<path id="Vector_2" d="M2.4 2.4C1.76348 2.4 1.15303 2.65286 0.702944 3.10294C0.252856 3.55303 0 4.16348 0 4.8L0 7.2L12 12L24 7.2V4.8C24 4.16348 23.7471 3.55303 23.2971 3.10294C22.847 2.65286 22.2365 2.4 21.6 2.4H2.4Z" fill="black"/>
+</g>
+<defs>
+<clipPath id="clip0_0_109">
+<rect width="24" height="24" fill="white"/>
+</clipPath>
+</defs>
+</svg>

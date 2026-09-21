@@ -1,15 +1,12 @@
 <script lang="ts">
     /**
-     * Opening a virtual or shadow account against one the user already holds.
-     *
-     * From onebank-ui `ACCOUNT/components/web/WebOpenNewAccount.svelte`. Its
-     * source list is every account on the user's cards — not the group's, and
-     * not filtered by `getavailableaccounts`, since the new account is opened
-     * against a personal one whether or not the group holds it.
+     * Opening a main (virtual) or shadow account against one of the user's real
+     * accounts: pick the source, optionally name it, confirm.
      */
     import Icon from '@iconify/svelte';
+    import SelectableAccount from '../../lib/components/SelectableAccount.svelte';
     import {openNewAccount} from '../../lib/api/commands';
-    import {maskAccount, t} from '../../lib/utils/helper';
+    import {t} from '../../lib/utils/helper';
     import {cards} from './cards';
 
     let {
@@ -22,21 +19,13 @@
         onCancel: () => void
     } = $props();
 
-    const CCY_BADGE: Record<string, string> = {
-        LAK: 'bg-red-100 text-red-700',
-        USD: 'bg-green-100 text-green-700',
-        THB: 'bg-purple-100 text-purple-700',
-        CNY: 'bg-yellow-100 text-yellow-700',
-    };
-
     let selected = $state('');
     let alias = $state('');
     let saving = $state(false);
     let error = $state('');
 
-    const title = $derived(
-        accountType === 'SHADOW' ? t('Add Shadow Account', 'ເພີ່ມບັນຊີເງົາ') : t('Add Virtual Account', 'ເພີ່ມບັນຊີຫຼັກ'),
-    );
+    const title = $derived(accountType === 'SHADOW' ? t('Add shadow account', 'ເພີ່ມບັນຊີເງົາ') : t('Add main account', 'ເພີ່ມບັນຊີຫຼັກ'));
+    const accounts = $derived($cards.flatMap((card) => card.accounts));
 
     async function open() {
         if (!selected) {
@@ -57,82 +46,44 @@
     }
 </script>
 
-<div class="space-y-4">
+<div class="space-y-5">
     <div class="flex items-center gap-2">
-        <button class="rounded-lg p-1 hover:bg-gray-100" onclick={onCancel} aria-label={t('Back', 'ກັບຄືນ')}>
-            <Icon icon="mdi:arrow-left" width={20} height={20}/>
+        <button type="button" class="rounded-full p-1 hover:bg-white" onclick={onCancel} aria-label={t('Back', 'ກັບຄືນ')}>
+            <Icon icon="mdi:arrow-left" class="h-6 w-6"/>
         </button>
-        <h2 class="text-lg font-semibold text-gray-800">{title}</h2>
+        <h2 class="text-2xl font-semibold">{title}</h2>
     </div>
 
-    {#if error}
-        <div class="rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</div>
-    {/if}
+    {#if error}<div class="rounded-ob-sm bg-red-50 p-3 text-sm text-red-700" role="alert">{error}</div>{/if}
 
-    {#if $cards.length === 0}
-        <div class="rounded-xl border border-gray-200 bg-white p-8 text-center text-gray-500">
+    {#if accounts.length === 0}
+        <div class="ob-card p-8 text-center text-onebank-subtle">
             {t('You have no account to open this against.', 'ທ່ານບໍ່ມີບັນຊີສຳລັບເປີດບັນຊີນີ້')}
         </div>
     {:else}
-        <div class="space-y-4">
-            <div class="text-sm font-medium text-gray-700">{t('Open against', 'ເປີດຈາກບັນຊີ')}</div>
-            {#each $cards as card (card.cardid)}
-                <div class="overflow-hidden rounded-lg border border-gray-200 bg-white">
-                    <div class="flex min-h-[60px] items-center gap-4 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white p-4">
-                        <img src="img/{card.filename}" alt="" class="h-12 w-auto rounded-md"/>
-                        <div>
-                            <h3 class="text-lg font-semibold text-gray-900">{card.cardtype}</h3>
-                            <p class="text-sm text-gray-600">{card.cardnumber}</p>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-1 gap-3 p-4 tablet:grid-cols-2">
-                        {#each card.accounts as account (account.accountid)}
-                            <label class="cursor-pointer">
-                                <input
-                                        type="radio"
-                                        class="peer sr-only"
-                                        name="source-account"
-                                        value={account.accountid}
-                                        checked={selected === account.accountid}
-                                        onchange={() => (selected = account.accountid)}
-                                />
-                                <div
-                                        class="rounded-xl border border-gray-200 bg-white p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-gray-300 hover:shadow-lg peer-checked:border-onebank-red peer-checked:bg-red-50 peer-checked:shadow-lg"
-                                >
-                                    <div class="flex items-start justify-between gap-2">
-                                        <div class="min-w-0">
-                                            <div class="truncate text-sm font-semibold text-gray-900">{maskAccount(account.account)}</div>
-                                            <div class="truncate text-xs text-gray-600">{account.name}</div>
-                                        </div>
-                                        <span class="inline-flex flex-shrink-0 items-center rounded-full px-2 py-0.5 text-xs font-medium {CCY_BADGE[account.ccy] ?? 'bg-gray-200 text-black'}">
-                                            {account.ccy}
-                                        </span>
-                                    </div>
-                                </div>
-                            </label>
-                        {/each}
-                    </div>
-                </div>
+        <div class="grid grid-cols-1 gap-3 tablet:grid-cols-2 desktop:grid-cols-3" role="radiogroup" aria-label={t('Open against', 'ເປີດຈາກບັນຊີ')}>
+            {#each accounts as account (account.accountid)}
+                <SelectableAccount {account} multiple={false} name="source-account"
+                                   selected={selected === account.accountid} onToggle={() => (selected = account.accountid)}/>
             {/each}
+        </div>
 
-            <div class="space-y-2">
-                <label for="newAccountAlias" class="text-sm font-medium text-gray-700">{t('Alias', 'ຊື່ເອີ້ນບັນຊີ')}</label>
-                <input
-                        id="newAccountAlias"
-                        type="text"
-                        bind:value={alias}
-                        maxlength="50"
-                        placeholder={t('Enter alias', 'ປ້ອນຊື່ເອີ້ນ')}
-                        class="w-full rounded-xl border border-gray-300 px-4 py-3 text-base shadow-sm placeholder:text-gray-400 focus:border-onebank-red focus:ring-2 focus:ring-onebank-red"
-                />
+        <div class="pt-4">
+            <label for="newAccountAlias" class="mb-2 block text-xl">
+                {t('Account alias', 'ຊື່ເອີ້ນບັນຊີ')} <span class="text-sm text-onebank-subtle">({t('optional', 'ບໍ່ບັງຄັບ')})</span>
+            </label>
+            <div class="relative">
+                <input id="newAccountAlias" type="text" bind:value={alias} maxlength="50"
+                       placeholder={t('A name that helps you recognise this account', 'ຊື່ເອີ້ນບັນຊີ ທີ່ຈະຊ່ວຍໃຫ້ທ່ານຈື່ຈຳໄດ້ງ່າຍ')}
+                       class="ob-input pr-16 text-center"/>
+                <span class="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-onebank-muted">{alias.length}/50</span>
             </div>
+        </div>
 
-            <div class="flex justify-end gap-3 border-t border-gray-200 pt-4">
-                <button type="button" class="onebank-secondary-btn" onclick={onCancel} disabled={saving}>{t('Cancel', 'ຍົກເລີກ')}</button>
-                <button type="button" class="onebank-primary-btn" onclick={open} disabled={saving || !selected}>
-                    {saving ? t('Opening…', 'ກຳລັງເປີດ…') : t('Open account', 'ເປີດບັນຊີ')}
-                </button>
-            </div>
+        <div class="flex justify-center pt-4">
+            <button type="button" class="onebank-primary-btn tablet:w-60" onclick={open} disabled={saving || !selected}>
+                {saving ? t('Opening…', 'ກຳລັງເປີດ…') : t('Add account', 'ເພີ່ມບັນຊີ')}
+            </button>
         </div>
     {/if}
 </div>

@@ -1,16 +1,17 @@
 <script lang="ts">
-    import {untrack} from "svelte";
-    import {innerWidth} from "svelte/reactivity/window";
-    import Layout from "./Layout.svelte";
-    import FrameContainer from "./FrameContainer.svelte";
-    import {displaySidebar} from "../stores/ui";
-    import {refreshGroups, seedFromLogin} from "../stores/groups";
+    import {untrack} from 'svelte';
+    import Router from 'svelte-spa-router';
+    import Layout from './Layout.svelte';
+    import routes from '../routes';
+    import {refreshGroups, seedFromLogin} from '../stores/groups';
+    import {currentGroup} from '../stores/onebankGroups';
+    import {loadGroupHome} from '../stores/home';
+    import {refreshBadges} from '../stores/badges';
 
     let sidebarExpand = $state(true);
 
-    // The group list comes from the login payload first — MAIN.html read the
-    // same cached value rather than calling the core — then a live loadgroups
-    // picks up anything created elsewhere since. A one-shot boot task, so
+    // The group list comes from the login payload first, then a live
+    // `loadgroups` picks up anything created since. A one-shot boot task, so
     // nothing it reads may become a dependency.
     $effect(() => {
         untrack(() => {
@@ -19,20 +20,17 @@
         });
     });
 
-    // Narrow viewports start collapsed, and collapse again if the window is
-    // resized down. Widening deliberately does *not* re-expand: once the user
-    // has toggled the rail, that choice stands.
+    // Every screen reads the active group's home (the sidebar card at least),
+    // so it is loaded here whenever the group changes — not only by the home
+    // route, which left a deep link to `#/account` with an empty card.
     $effect(() => {
-        if ((innerWidth.current ?? 0) < 768 && untrack(() => sidebarExpand)) {
-            sidebarExpand = false;
-        }
+        const id = $currentGroup;
+        if (!id) return;
+        void loadGroupHome(id);
+        void refreshBadges(id);
     });
 </script>
 
-<Layout
-        sidebarExpanded={sidebarExpand}
-        displaySidebar={$displaySidebar}
-        onToggleExpand={() => (sidebarExpand = !sidebarExpand)}
->
-    <FrameContainer/>
+<Layout sidebarExpanded={sidebarExpand} onToggleExpand={() => (sidebarExpand = !sidebarExpand)}>
+    <Router {routes}/>
 </Layout>

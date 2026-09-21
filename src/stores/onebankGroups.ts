@@ -1,5 +1,5 @@
 import {derived, writable} from "svelte/store";
-import type {LoadHomeResult, SidebarMenuTitle} from "../definition";
+import type {GroupDetail, LoadHomeResult, SidebarMenuTitle} from "../definition";
 
 interface GroupMetadata{
     isFinishLoad : boolean
@@ -30,11 +30,8 @@ export const loadHomeResult = derived(
 /**
  * Records a successful ONEBANKHOME/loadhome and makes that group the active one.
  *
- * The active group used to be set by an `updateTab` message, but nothing in
- * b1hybrid or onebank-ui ever sends one — so it stayed empty and every consumer
- * keyed on it (the sidebar, the data layer's default `onebankid`) waited
- * forever. The group id on the loadhome response is the signal that does
- * arrive: whichever group most recently loaded its home is the one on screen.
+ * The group id on the loadhome response is the signal: whichever group most
+ * recently loaded its home is the one on screen.
  */
 export function adoptLoadHomeResult(response: LoadHomeResult | undefined | null): boolean {
 	const onebankid = response?.detail?.onebankid
@@ -58,4 +55,19 @@ export function registerGroup(onebankid: string): void {
 	onebankGroups.update(groups =>
 		groups[onebankid] ? groups : {...groups, [onebankid]: {isFinishLoad: false, loadHomeResult: null as any}},
 	)
+}
+
+/** Merges an edited name / description / logo into the cached home, so it shows at once. */
+export function patchGroupDetail(onebankid: string, patch: Partial<GroupDetail>): void {
+	onebankGroups.update(groups => {
+		const group = groups[onebankid]
+		if (!group?.loadHomeResult) return groups
+		return {
+			...groups,
+			[onebankid]: {
+				...group,
+				loadHomeResult: {...group.loadHomeResult, detail: {...group.loadHomeResult.detail, ...patch}},
+			},
+		}
+	})
 }

@@ -64,12 +64,6 @@ async function flush(): Promise<void> {
   await tick()
 }
 
-/** Opens the kebab menu on the nth account card. */
-async function openMenu(index: number): Promise<void> {
-  buttonsLabelled('More actions')[index].click()
-  await flush()
-}
-
 beforeEach(async () => {
   sent = []
   respond = (_service, data) => {
@@ -142,7 +136,6 @@ describe('the list', () => {
 
 describe('locking', () => {
   it('confirms before it changes anything', async () => {
-    await openMenu(0)
     buttonsLabelled('Lock account')[0].click()
     await flush()
 
@@ -151,7 +144,6 @@ describe('locking', () => {
   })
 
   it('sends the opposite status once confirmed', async () => {
-    await openMenu(0)
     buttonsLabelled('Lock account')[0].click()
     await flush()
     buttonsLabelled('Confirm')[0].click()
@@ -164,7 +156,6 @@ describe('locking', () => {
   })
 
   it('unlocks an account that is locked', async () => {
-    await openMenu(1)
     buttonsLabelled('Unlock account')[0].click()
     await flush()
     buttonsLabelled('Confirm')[0].click()
@@ -174,7 +165,6 @@ describe('locking', () => {
   })
 
   it('reloads the list afterwards, rather than closing the page', async () => {
-    await openMenu(0)
     buttonsLabelled('Lock account')[0].click()
     await flush()
     buttonsLabelled('Confirm')[0].click()
@@ -187,15 +177,13 @@ describe('locking', () => {
 
 describe('removing', () => {
   it('warns that closing a shadow account is permanent', async () => {
-    await openMenu(1)
-    buttonsLabelled('Remove account')[0].click()
+    buttonsLabelled('Remove account')[1].click()
     await flush()
 
     expect(text()).toContain('permanently')
   })
 
   it('does not warn about permanence for an ordinary account', async () => {
-    await openMenu(0)
     buttonsLabelled('Remove account')[0].click()
     await flush()
 
@@ -204,7 +192,6 @@ describe('removing', () => {
   })
 
   it('sends one remove instruction once confirmed', async () => {
-    await openMenu(0)
     buttonsLabelled('Remove account')[0].click()
     await flush()
     buttonsLabelled('Confirm')[0].click()
@@ -214,7 +201,6 @@ describe('removing', () => {
   })
 
   it('changes nothing when the dialog is cancelled', async () => {
-    await openMenu(0)
     buttonsLabelled('Remove account')[0].click()
     await flush()
     buttonsLabelled('Cancel')[0].click()
@@ -260,7 +246,7 @@ describe('the alias', () => {
 
 describe('adding from a personal account', () => {
   it('offers only the accounts the core says are still available', async () => {
-    buttonsLabelled('Add from personal account')[0].click()
+    buttonsLabelled('Add from a personal account')[0].click()
     await flush()
 
     expect(text()).toContain('Personal')
@@ -268,14 +254,14 @@ describe('adding from a personal account', () => {
   })
 
   it('adds the checked accounts in one batch', async () => {
-    buttonsLabelled('Add from personal account')[0].click()
+    buttonsLabelled('Add from a personal account')[0].click()
     await flush()
 
     const checkbox = host.querySelector('input[type="checkbox"]') as HTMLInputElement
     checkbox.click()
     await flush()
 
-    buttonsLabelled('Save')[0].click()
+    buttonsLabelled('Add account')[0].click()
     await flush()
 
     expect(callsTo('changeaccounts')[0].data.accounts).toEqual([{ accountid: 'A9', action: 'add' }])
@@ -285,7 +271,7 @@ describe('adding from a personal account', () => {
 
 describe('opening a new account', () => {
   it('sends the type, the source account and the alias', async () => {
-    buttonsLabelled('Add Shadow Account')[0].click()
+    buttonsLabelled('Add shadow account')[0].click()
     await flush()
 
     const radio = host.querySelector('input[type="radio"]') as HTMLInputElement
@@ -297,13 +283,11 @@ describe('opening a new account', () => {
     alias.dispatchEvent(new Event('input', { bubbles: true }))
     await tick()
 
-    buttonsLabelled('Open account')[0].click()
+    buttonsLabelled('Add account')[0].click()
     await flush()
 
     const calls = callsTo('opennewaccount')
     expect(calls).toHaveLength(1)
-    // The only command on the ONEBANK service; the core takes the group from
-    // the session, so no onebankid rides along.
     expect(calls[0].service).toBe('ONEBANK')
     expect(calls[0].data).toMatchObject({ accountType: 'SHADOW', accountid: 'A9', alias: 'petty' })
   })

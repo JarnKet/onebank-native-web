@@ -41,7 +41,7 @@ beforeEach(async () => {
   host = document.createElement('div')
   document.body.appendChild(host)
   await goto('#/')
-  app = mount(Sidebar, { target: host, props: { expand: true, displaySidebar: true } })
+  app = mount(Sidebar, { target: host, props: { expand: true } })
   await tick()
 })
 
@@ -58,21 +58,21 @@ describe('sidebar highlight', () => {
 
   it('follows a navigation to another page', async () => {
     await goto('#/role')
-    expect(highlighted()).toEqual(['Role'])
+    expect(highlighted()).toEqual(['Manage permissions'])
   })
 
   it('keeps following across several navigations', async () => {
     await goto('#/role')
-    expect(highlighted()).toEqual(['Role'])
+    expect(highlighted()).toEqual(['Manage permissions'])
     await goto('#/member')
-    expect(highlighted()).toEqual(['Member'])
-    await goto('#/transaction')
-    expect(highlighted()).toEqual(['Transaction'])
+    expect(highlighted()).toEqual(['Manage members'])
+    await goto('#/messages')
+    expect(highlighted()).toEqual(['Messages'])
   })
 
   it('returns to Home when navigating back to the root', async () => {
     await goto('#/account')
-    expect(highlighted()).toEqual(['Account'])
+    expect(highlighted()).toEqual(['Accounts'])
     await goto('#/')
     expect(highlighted()).toEqual(['Home'])
   })
@@ -84,12 +84,17 @@ describe('sidebar highlight', () => {
 
   it('ignores the querystring when matching', async () => {
     await goto('#/role?page=addpermission&newuserid=U7')
-    expect(highlighted()).toEqual(['Role'])
+    expect(highlighted()).toEqual(['Manage permissions'])
   })
 
-  it('maps group-management onto the Group entry', async () => {
-    await goto('#/group-management')
-    expect(highlighted()).toEqual(['Group'])
+  it('keeps a sub-page on its parent entry', async () => {
+    await goto('#/messages/M3')
+    expect(highlighted()).toEqual(['Messages'])
+  })
+
+  it('highlights nothing on a page with no entry of its own', async () => {
+    await goto('#/statement')
+    expect(highlighted()).toEqual([])
   })
 
   it('falls back to Home for an unknown path', async () => {

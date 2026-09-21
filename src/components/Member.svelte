@@ -1,44 +1,39 @@
 <script lang="ts">
+  /**
+   * The group's members as an overlapping avatar stack, owners first, with a
+   * "+N" for the rest — the row under the group name in the sidebar card.
+   */
   import type { User } from '../definition'
-  import { getProfileImageUrl } from '../lib/utils/helper'
+  import { initials } from '../lib/utils/helper'
   import { loadHomeResult } from '../stores/onebankGroups'
+
+  let { max = 5 }: { max?: number } = $props()
 
   // Copy before sorting: the array belongs to the cached loadhome payload, and
   // sorting in place reorders it for every other reader.
   function sortUsersByRole(users: User[]): User[] {
-    return [...users].sort((a, b) => {
-      if (a.role === 'OWNER' && b.role !== 'OWNER') {
-        return -1
-      } else if (a.role !== 'OWNER' && b.role === 'OWNER') {
-        return 1
-      } else {
-        return 0
-      }
-    })
+    const rank = (user: User) => (user.role === 'OWNER' ? 0 : user.role === 'ADMIN' ? 1 : 2)
+    return [...users].sort((a, b) => rank(a) - rank(b))
   }
 
-  // `loadHomeResult` is null between a group being known and its home arriving.
   const members = $derived(sortUsersByRole($loadHomeResult?.users ?? []))
-  const shown = $derived(members.slice(0, 5))
+  const shown = $derived(members.slice(0, max))
+
+  const TINTS = ['#e5e7eb', '#fde2e2', '#dbeafe', '#dcfce7', '#fef3c7', '#ede9fe']
 </script>
 
-<div class="flex justify-between">
-  {#if members.length > 0}
-    <div class="flex -space-x-1 overflow-hidden py-1">
-      {#each shown as member (member.userid)}
-        <img
-          class="inline-block h-7 w-7 self-end rounded-full ring-2 ring-white"
-          src={getProfileImageUrl(member.profiletype, member.profileid, member.faceid + '.jpg', '')}
-          alt={member.name}
-        />
-      {/each}
-      {#if members.length > 5}
-        <div
-          class="flex h-7 w-7 items-center justify-center self-end rounded-full bg-gray-200 text-center text-xs font-medium text-gray-700 ring-2 ring-white"
-        >
-          +{members.length - 5}
-        </div>
-      {/if}
-    </div>
-  {/if}
-</div>
+{#if members.length > 0}
+  <div class="flex items-center -space-x-[7px]" aria-label="{members.length} members">
+    {#each shown as member, index (member.userid)}
+      <span
+        class="flex h-[30px] w-[30px] items-center justify-center rounded-full text-[10px] font-semibold text-gray-600 ring-2 ring-white"
+        style="background-color: {TINTS[index % TINTS.length]}"
+        title={member.name}>{initials(member.name)}</span>
+    {/each}
+    {#if members.length > max}
+      <span class="flex h-[30px] w-[30px] items-center justify-center rounded-full bg-[#e8e8f0] text-xs text-black ring-2 ring-white">
+        +{members.length - max}
+      </span>
+    {/if}
+  </div>
+{/if}

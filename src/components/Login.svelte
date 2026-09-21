@@ -2,8 +2,6 @@
     import type {Snippet} from 'svelte';
     import Icon from '@iconify/svelte';
     import LanguageSelector from './LanguageSelector.svelte';
-    import {showUnauthenticatedPopup} from '../lib/utils/helper';
-    import Calendar from "../lib/modules/Calendar/Calendar.svelte";
     import {language} from "../stores/config";
 
     interface Props {
@@ -40,10 +38,10 @@
             <div class="w-1/2 ">
                 <div class="flex flex-col gap-2">
                     <div class="flex justify-between items-center">
-                        <button
-                                class="group flex flex-col items-center transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                        <a
+                                class="group flex flex-col items-center transition-all hover:scale-105"
                                 aria-label="Customer Support"
-                                onclick={() => {showUnauthenticatedPopup('ONECARE.html')}}
+                                href="tel:1555"
                         >
                             <div class="flex h-10 w-10 items-center justify-center rounded-full bg-onebank-red/5 transition-colors group-hover:bg-onebank-red/10 disabled:group-hover:bg-onebank-red/5 tablet:h-12 tablet:w-12">
                                 <Icon icon="mdi:headphones-settings"
@@ -58,7 +56,7 @@
                                     <span>{t('Support', 'ພະນັກງານ')}</span>
                                 </div>
                             </div>
-                        </button>
+                        </a>
                         <LanguageSelector currentLang={$language}/>
                     </div>
                     <div class="mx-auto">
@@ -86,9 +84,6 @@
                     {@render children?.()}
                 </div>
             </div>
-        </div>
-        <div class="mt-4">
-            <Calendar/>
         </div>
     </div>
     <div class="mt-4 text-center">

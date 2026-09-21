@@ -10,7 +10,6 @@
      * failure nothing is patched and the error is shown; the mobile version
      * originally left its loading overlay up forever on this path.
      */
-    import Icon from '@iconify/svelte';
     import MenuIcon from './MenuIcon.svelte';
     import {menus} from '../../lib/menus';
     import {availableMenuGroups} from './menuGroups';
@@ -76,22 +75,22 @@
     }
 </script>
 
-<div class="flex h-full flex-col rounded-xl bg-onebank-base-50 shadow">
-    <div class="flex items-center justify-between gap-2 border-b border-gray-100 p-3">
-        <button class="rounded-lg p-1 hover:bg-gray-100" onclick={onClose} aria-label={t('Back', 'ກັບຄືນ')}>
-            <Icon icon="mdi:arrow-left" width={20} height={20}/>
-        </button>
-        <div class="text-sm text-gray-500">{selected.length}/{MAX_QUICK_ACCESS}</div>
-        <button class="rounded-lg bg-onebank-red px-3 py-1.5 text-sm text-white disabled:opacity-50" onclick={save} disabled={saving}>
-            {saving ? t('Saving…', 'ກຳລັງບັນທຶກ…') : t('Save', 'ບັນທຶກ')}
-        </button>
+<div class="flex flex-col">
+    <div class="mb-3 flex items-center justify-between gap-2">
+        <p class="text-sm text-onebank-subtle">{t('Pick up to ten', 'ເລືອກໄດ້ເຖິງ 10')} · {selected.length}/{MAX_QUICK_ACCESS}</p>
+        <div class="flex gap-2">
+            <button type="button" class="h-10 rounded-ob-xl border-2 border-onebank-blue bg-white text-onebank-blue hover:bg-onebank-blue-soft px-5 text-sm font-bold" onclick={onClose}>{t('Cancel', 'ຍົກເລີກ')}</button>
+            <button type="button" class="h-10 rounded-ob-xl bg-onebank-red px-5 text-sm font-bold text-white disabled:opacity-50" onclick={save} disabled={saving}>
+                {saving ? t('Saving…', 'ກຳລັງບັນທຶກ…') : t('Save', 'ບັນທຶກ')}
+            </button>
+        </div>
     </div>
 
     {#if error}
         <div class="mx-3 mt-2 rounded-lg bg-red-50 p-2 text-sm text-red-700">{error}</div>
     {/if}
 
-    <div class="flex-1 overflow-y-auto p-3">
+    <div>
         {#each groups as group (Object.keys(group)[0])}
             {@const name = Object.keys(group)[0]}
             {@const keys = Object.values(group)[0]}

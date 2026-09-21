@@ -29,10 +29,31 @@
   --breakpoint-laptop: 960px;
   --breakpoint-desktop: 1280px;
 
+  /* Brand, from the Figma file ("OneBank Web – by Pink"). Every red fill in the
+     design — tabs, the active nav pill, buttons, today's date — is #c11111;
+     #DD2319 is the file's "Onebank main color" variable, the logo's red, and
+     #133D6B its "Blue". DESIGN.md has the full palette and where each is used. */
   --color-onebank-white: #ffffff;
-  --color-onebank-red: #b11111;
-  --color-onebank-light-red: #ff4f49;
+  --color-onebank-red: #c11111;
+  --color-onebank-main: #dd2319;
+  --color-onebank-blue: #133d6b;
+  --color-onebank-blue-soft: #eef3f9;  /* navy tint: hover on navy-outlined controls */
+  --color-onebank-light-red: #dd2319;
   --color-onebank-dark-red: #9e0d0d;
+
+  /* Surfaces and text, as the design sets them. */
+  --color-onebank-page: #f6f6f6;       /* page ground */
+  --color-onebank-surface: #fcfcfe;    /* the calendar card */
+  --color-onebank-row: #f1f1f1;        /* a settled list row */
+  --color-onebank-pink: #ffe4e4;       /* a pending list row, selected cards */
+  --color-onebank-pink-2: #f6cece;     /* the rail's collapse chevron */
+  --color-onebank-muted: #9d9fa3;      /* placeholders, past days, cancelled */
+  --color-onebank-subtle: #848484;     /* secondary text on a settled row */
+  --color-onebank-ink: #222222;        /* input outlines */
+  --color-onebank-pending: #b34ede;    /* "Pending" status */
+  --color-onebank-debit: #dd7878;      /* a settled debit amount */
+  --color-onebank-income: #3fb65f;     /* chart income total */
+  --color-onebank-expense: #f25f5c;    /* chart expense total */
   --color-onebank-grey: #424242;
   --color-onebank-grey-2: #9e9e9e;
   --color-onebank-grey-3: #424242;
@@ -70,11 +91,16 @@
   --color-base-950: #030712;
 
   --shadow-onebank: 0px 1px 12px 0px rgba(255, 82, 82, 0.15);
+  /* The design's two shadows: every card, and the top bar's pills. */
+  --shadow-ob-card: 0px 0px 6px 0px rgba(0, 0, 0, 0.15);
+  --shadow-ob-pill: 0px 2px 6px 0px rgba(0, 0, 0, 0.15);
 
   /* The OneBank radius scale. `ob-md` is the default for cards and inputs. */
   --radius-ob-sm: 10px;
   --radius-ob-md: 12px;
   --radius-ob-lg: 16px;
+  /* Cards, tabs, pills and primary buttons are all 20px in the design. */
+  --radius-ob-xl: 20px;
 
   /* Noto Sans Lao Looped is the brand face and the only one that renders Lao
      correctly at small sizes. It is also the default sans, so unstyled text
@@ -83,10 +109,17 @@
   --font-sans: 'Noto Sans Lao Looped', sans-serif;
 }
 
-/* The brand gradient, as a class because it is used on backgrounds Tailwind has
-   no token namespace for. Matches `--color-onebank-light-red` -> `-red` -> `-dark-red`. */
+/* The brand gradient, for the few surfaces that want more than a flat fill
+   (the create-OneBank hero). Runs main -> red -> dark red. */
 .ob-gradient {
-  background-image: linear-gradient(135deg, #ff4f49 0%, #b11111 50%, #9e0d0d 100%);
+  background-image: linear-gradient(135deg, #dd2319 0%, #c11111 50%, #9e0d0d 100%);
+}
+
+/* The design's card: white, 20px, one soft shadow. */
+.ob-card {
+  border-radius: 20px;
+  background-color: #ffffff;
+  box-shadow: 0px 0px 6px 0px rgba(0, 0, 0, 0.15);
 }
 
 *{
@@ -98,42 +131,7 @@
 html,
 body,
 #app {
-  @apply relative flex h-full w-full flex-col overflow-hidden bg-onebank-base-100;
-
-}
-
-#framecontainer {
-  width: 100%;
-  height: 100%;
-}
-
-iframe {
-  border: none;
-  background-color: white;
-  width: 100%;
-  height: 100%;
-}
-
-@media (min-width: 420px) {
-  #framecontainer {
-    background-color: #333;
-    text-align: center;
-    height: 100%;
-  }
-
-  #framecontainer.mobile {
-    padding-top: 40px;
-  }
-
-  iframe.mobile {
-    width: 411px;
-    height: 731px;
-  }
-
-  iframe.desktop {
-    width: 100%;
-    height: 100%;
-  }
+  @apply relative flex h-full w-full flex-col overflow-hidden bg-onebank-page text-black;
 }
 
 .onebank-card {
@@ -143,11 +141,25 @@ iframe {
 
 
 .onebank-primary-btn {
-  @apply inline-flex w-full items-center justify-center rounded-lg bg-onebank-red px-4 py-3 text-sm font-medium text-white hover:bg-red-600 active:bg-red-700 disabled:cursor-not-allowed disabled:bg-onebank-red/50 disabled:hover:bg-onebank-red/50 tablet:min-w-fit  tablet:max-w-[200px];
+  @apply inline-flex h-[50px] w-full items-center justify-center gap-2 rounded-ob-xl bg-onebank-red px-6 text-base font-bold text-white transition-colors hover:bg-onebank-dark-red active:bg-onebank-dark-red disabled:cursor-not-allowed disabled:bg-onebank-red/50 tablet:w-auto tablet:min-w-[174px];
 }
 
 .onebank-secondary-btn {
-  @apply inline-flex w-full items-center justify-center rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-sm  hover:bg-gray-50 active:bg-gray-100 disabled:cursor-not-allowed disabled:border-gray-100 disabled:bg-gray-100 disabled:text-gray-400 disabled:hover:bg-gray-100 tablet:min-w-fit tablet:max-w-[200px];
+  @apply inline-flex h-[50px] w-full items-center justify-center gap-2 rounded-ob-xl border-2 border-onebank-blue bg-white px-6 text-base font-bold text-onebank-blue transition-colors hover:bg-onebank-blue-soft disabled:cursor-not-allowed disabled:border-gray-300 disabled:text-gray-400 tablet:w-auto tablet:min-w-[174px];
+}
+
+/* The outlined red button: "assign transaction", "add shortcut". */
+.onebank-outline-btn {
+  @apply inline-flex h-[50px] w-full items-center justify-center gap-2 rounded-ob-xl border-2 border-onebank-red bg-white px-6 text-base font-bold text-onebank-red transition-colors hover:bg-onebank-pink disabled:cursor-not-allowed disabled:opacity-50;
+}
+
+/* A text field as the design draws it. */
+.ob-input {
+  @apply block w-full rounded-ob-sm border border-[#d9d9d9] bg-white px-4 py-2.5 text-base text-black placeholder:text-onebank-muted focus:border-onebank-red focus:ring-onebank-red;
+}
+
+.ob-label {
+  @apply mb-1.5 block text-sm font-medium text-black;
 }
 
 /* Shared classes harvested components rely on (ported from onebank-ui app.scss). */
@@ -174,30 +186,4 @@ iframe {
 
 .disabled-icon {
   @apply pointer-events-none cursor-not-allowed opacity-50;
-}
-
-/* Carbon Charts overrides, ported from onebank-ui's app.scss. The library ships
-   its own layout; these reclaim space the donut legend would otherwise take and
-   tone down its axis labels. */
-
-.legend-item .checkbox {
-  --chkfg: none;
-  box-shadow: none !important;
-}
-
-.value-container {
-  @apply justify-center;
-}
-
-.layout-child:first-child.legend {
-  overflow-y: auto !important;
-  width: 40% !important;
-}
-
-.layout-child:nth-child(3).graph-frame {
-  width: 70% !important;
-}
-
-.cds--cc--chart-wrapper text:nth-child(2) {
-  @apply fill-gray-400!;
 }

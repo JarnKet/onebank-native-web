@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import { BCELONE_PAGES, sidebarMenuItems } from './constant'
-import { HOME_PATH, isRoutedPage, routeDefinitions, routeForMenu, routeForPage, routeForPath } from './routes'
+import { sidebarMenuItems } from './constant'
+import { menus } from './menus'
+import { HOME_PATH, hasScreen, pathForMenuKey, routeDefinitions, routeForMenu, routeForPath } from './routes'
 
 describe('route table', () => {
   it('has unique paths', () => {
@@ -12,63 +13,45 @@ describe('route table', () => {
     expect(routeForPath(HOME_PATH)?.menu).toBe('HOME')
   })
 
-  it('covers every sidebar entry that opens a page', () => {
-    const opensAPage = sidebarMenuItems.filter((m) => m.popupName !== '')
-    for (const menu of opensAPage) {
-      expect(routeForPage(`${menu.popupName}.html`), `no route for ${menu.popupName}`).toBeDefined()
-    }
-  })
-
-  it('maps each sidebar menu id to a route', () => {
+  it('maps every sidebar entry to a route', () => {
     for (const menu of sidebarMenuItems) {
       if (menu.id === 'LOGOUT') continue
       expect(routeForMenu(menu.id), `no route for menu ${menu.id}`).toBeDefined()
     }
   })
 
-  it('sends a sidebar entry to the first route that claims it, not the last', () => {
-    // `/group`, `/group-management` and `/register` all carry menu GROUP. A
-    // Map built from pairs keeps the last, which sent the sidebar's Group entry
-    // to REGISTERONEBANK.
-    expect(routeForMenu('GROUP')?.path).toBe('/group')
+  it('sends a sidebar entry to its main page, not a sub-page sharing its highlight', () => {
+    expect(routeForMenu('MESSAGE')?.path).toBe('/messages')
+    expect(routeForMenu('AUTHORIZATION')?.path).toBe('/authorization')
   })
 
-  it('resolves every menu to a route that actually declares it', () => {
-    for (const menu of new Set(routeDefinitions.map((r) => r.menu))) {
-      expect(routeForMenu(menu)?.menu, `menu ${menu} resolved elsewhere`).toBe(menu)
+  it('matches parameterised paths', () => {
+    expect(routeForPath('/messages/M3')?.menu).toBe('MESSAGE')
+    expect(routeForPath('/service/LEASING')?.path).toBe('/service/:key')
+    expect(routeForPath('/nowhere')).toBeUndefined()
+  })
+
+  it('claims each menu key at most once', () => {
+    const keys = routeDefinitions.flatMap((r) => r.menuKeys ?? [])
+    expect(new Set(keys).size).toBe(keys.length)
+  })
+
+  it('only claims keys the menu registry knows', () => {
+    for (const key of routeDefinitions.flatMap((r) => r.menuKeys ?? [])) {
+      expect(menus[key], `route claims unknown menu key ${key}`).toBeDefined()
     }
   })
 })
 
-describe('page ownership', () => {
-  it('owns the corporate OneBank pages', () => {
-    for (const page of ['TRANSACTION.html', 'ROLE.html', 'MEMBER.html', 'GROUPMANAGEMENT.html']) {
-      expect(isRoutedPage(page), page).toBe(true)
-    }
+describe('menu keys', () => {
+  it('open their own screen when there is one', () => {
+    expect(pathForMenuKey('TRANSFER')).toBe('/transfer')
+    expect(pathForMenuKey('ELECTRICITY')).toBe('/bill/electricity')
+    expect(hasScreen('ECHEQUE')).toBe(true)
   })
 
-  it('is case-insensitive on the page name', () => {
-    expect(isRoutedPage('role.html')).toBe(true)
-  })
-
-  it('never claims a b1hybrid page', () => {
-    // b1hybrid stays iframed; claiming one of its pages as a route would break it.
-    for (const page of BCELONE_PAGES) {
-      expect(isRoutedPage(page), `${page} must stay an iframe`).toBe(false)
-    }
-  })
-
-  it('does not claim the 2FA page onebank-ui depends on', () => {
-    expect(isRoutedPage('TWOFACTOR.html')).toBe(false)
-  })
-
-  it('does not claim the main frame', () => {
-    expect(isRoutedPage('MAIN.html')).toBe(false)
-  })
-
-  it('does not claim out-of-scope onebank-ui pages', () => {
-    for (const page of ['ONEBANKKIDHOME.html', 'ONEBANKSTATEMENT.html', 'ECHEQUE.html']) {
-      expect(isRoutedPage(page), page).toBe(false)
-    }
+  it('open the coming-soon page otherwise, never nothing', () => {
+    expect(pathForMenuKey('LEASING_KRS')).toBe('/service/LEASING_KRS')
+    expect(hasScreen('LEASING_KRS')).toBe(false)
   })
 })

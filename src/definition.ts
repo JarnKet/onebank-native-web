@@ -29,15 +29,6 @@ export interface LoginData {
 	authToken: string
 }
 
-export interface PopupMetadata{
-	/** Absent when the opener does not want a result back. */
-	callbackid? : string
-	id : string
-	isVisible : boolean
-	src : string
-	isBcelOne : boolean
-}
-
 export interface Account {
 	accountid: string
 	account: string
@@ -48,6 +39,8 @@ export interface Account {
 	viewonly: number
 	maskedAccount: string
 	status?: string
+	availablebalance?: number
+	currentbalance?: number
 
 }
 
@@ -89,13 +82,12 @@ export interface LoadHomeResult {
 	detail: GroupDetail
 }
 
-export type SidebarMenuTitle = 'HOME' | 'TRANSACTION' | 'AUTHORIZATION' | 'ROLE' | 'ACCOUNT' | 'MEMBER' | 'GROUP' | 'LOGOUT';
+export type SidebarMenuTitle = 'HOME' | 'MESSAGE' | 'AUTHORIZATION' | 'ROLE' | 'ACCOUNT' | 'MEMBER' | 'GROUP' | 'LOGOUT';
 
 
 export     interface SidebarMenu {
 	id: SidebarMenuTitle
-	label: string
+	en: string
+	lo: string
 	icon: string
-	notifications: number
-	popupName: string
 }

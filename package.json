@@ -18,15 +18,7 @@
     "format:check": "prettier --check ."
   },
   "dependencies": {
-    "@carbon/charts": "1.22.18",
-    "@carbon/charts-svelte": "1.22.18",
     "@iconify/svelte": "^5.2.2",
-    "axios": "^1.19.0",
-    "browser-image-compression": "^2.0.2",
-    "crypto-js": "^4.2.0",
-    "jsbn": "^1.1.0",
-    "sass": "^1.103.1",
-    "svelte-qrcode": "^1.0.1",
     "svelte-spa-router": "^5.1.1"
   },
   "devDependencies": {
@@ -34,7 +26,6 @@
     "@tailwindcss/forms": "^0.5.11",
     "@tailwindcss/vite": "^4.3.3",
     "@tsconfig/svelte": "^5.0.8",
-    "@types/crypto-js": "^4.2.2",
     "@types/node": "^26.2.0",
     "jsdom": "^29.1.1",
     "prettier": "^3.9.6",

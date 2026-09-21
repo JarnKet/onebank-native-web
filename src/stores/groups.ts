@@ -27,7 +27,6 @@ import { get, writable } from 'svelte/store'
 import { loadGroups } from '../lib/api/commands'
 import type { OneBankGroup } from '../lib/api/types'
 import { currentGroup, registerGroup } from './onebankGroups'
-import { popups } from './popup'
 import { loginData } from './session'
 
 /** Every group the user belongs to, in server order, KID excluded. */
@@ -109,9 +108,6 @@ export async function refreshGroups(preferId?: string): Promise<string> {
 
     const target = has(preferId) ? preferId! : has(get(currentGroup)) ? get(currentGroup) : (list[list.length - 1]?.onebankid ?? '')
 
-    // Not `selectGroup`: a refresh runs while an overlay may still be open and
-    // awaiting its result (`closePopup` refreshes on the way out), so it must
-    // not tear the stack down underneath it.
     setActive(target)
     return target
   } finally {
@@ -124,13 +120,7 @@ function setActive(onebankid: string): void {
   currentGroup.set(onebankid)
 }
 
-/**
- * Makes a group active in response to the user picking it.
- *
- * Overlays belong to the group that opened them, so an explicit switch clears
- * the stack. Callers navigate afterwards; this only moves state.
- */
+/** Makes a group active in response to the user picking it. Callers navigate afterwards. */
 export function selectGroup(onebankid: string): void {
   setActive(onebankid)
-  popups.set([])
 }

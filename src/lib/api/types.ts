@@ -1,10 +1,10 @@
 /**
  * Wire types for the OneBank services.
  *
- * These mirror what the core actually returns and are the single place the wire
- * format is expressed. Keep them aligned with onebank-ui's `libs/definition.ts`
- * and its per-page `definition.ts` files — divergence here is how web and mobile
- * drift apart. See CLAUDE.md.
+ * The single place the wire format is expressed. The original 22 commands
+ * mirror what the BCEL One core returns (keep them aligned with onebank-ui's
+ * `libs/definition.ts`); the ones below them were added for screens the core
+ * never served natively and are answered by the mock backend in `./mock`.
  */
 
 import type { Account, GroupDetail, LoadHomeResult, Menu, User } from '../../definition'
@@ -153,18 +153,30 @@ export interface AddMemberEnquiryResponse extends ApiEnvelope {
 export interface AddMemberResponse extends ApiEnvelope {}
 export interface RemoveMemberResponse extends ApiEnvelope {}
 
+/** Spending caps on a role, in the account's currency. Absent means no cap. */
 export interface TransactionLimit {
-  [key: string]: unknown
+  pertransaction?: number
+  daily?: number
 }
 
+/**
+ * One level of approval: who may approve, and how many of them must.
+ * "ຕ້ອງອະນຸມັດທຸກຄົນ" is `ALL`; "ຕ້ອງອະນຸມັດຢ່າງຕ່ຳ N ຄົນ" is `ATLEAST` with `min`.
+ */
 export interface ApproverLevel {
-  [key: string]: unknown
+  level: number
+  userids: string[]
+  mode?: 'ALL' | 'ATLEAST'
+  min?: number
 }
 
 export interface Permission {
   permissionid?: number
+  /** Display name of the role, e.g. "Approver". */
+  name?: string
   accountids: string[]
   userids: string[]
+  /** `*` for every function, otherwise a comma-separated list of menu keys. */
   allowedfunctions?: string
   limit?: TransactionLimit
   approverlevels?: ApproverLevel[]
@@ -223,7 +235,27 @@ export interface TransactionInfo {
   profiletype?: number
   status?: string
   detail?: TransactionDetail
+  /** userid of whoever submitted it. */
+  makerid?: string
+  /** Decisions recorded so far, oldest first. */
+  approvals?: Approval[]
+  /** How many approvals it needs before it executes. 0 means none. */
+  requiredApprovals?: number
+  /** Set when a transfer was scheduled rather than sent now. */
+  scheduledfor?: string
+  /** The maker filed a rejected transaction away; it only shows in history now. */
+  archived?: boolean
   [key: string]: unknown
+}
+
+/** One approver's decision on a pending transaction. */
+export interface Approval {
+  userid: string
+  name: string
+  decision: 'APPROVED' | 'REJECTED'
+  time: string
+  level: number
+  reason?: string
 }
 
 export interface ViewTransactionsResponse extends ApiEnvelope {
@@ -241,4 +273,201 @@ export interface Approver {
 export interface GetApprovalDetailResponse extends ApiEnvelope {
   item?: TransactionInfo
   approvers?: Approver[]
+}
+
+// -------------------------------------------------- added for the mock backend
+
+export interface ApproveTransactionResponse extends ApiEnvelope {
+  item?: TransactionInfo
+}
+
+/** A statement is settled history for one account, plus its balance now. */
+export interface GetStatementResponse extends ApiEnvelope {
+  items?: TransactionInfo[]
+  balance?: number
+  ccy?: string
+}
+
+/** Who a transfer goes to. */
+export interface TransferItem {
+  toaccount: string
+  toname: string
+  /** International: SWIFT code and the receiver's address. ID card: pickup point and phone. */
+  swift?: string
+  address?: string
+  phone?: string
+  idcard?: string
+  pickup?: string
+  /** Who bears the fee on an international transfer. */
+  feebearer?: 'SENDER' | 'SHARED'
+  /** Bank code for an inter-bank transfer; BCEL otherwise. */
+  bank?: string
+  amount: number
+  ccy: string
+  note?: string
+}
+
+export type TransferKind = 'BCEL' | 'INTERBANK' | 'IDCARD' | 'SALARY'
+
+/** A transfer saved half-way, to be finished later. */
+export interface TransferDraft {
+  draftid: string
+  onebankid: string
+  name: string
+  kind: TransferKind
+  fromaccountid: string
+  items: TransferItem[]
+  savedat: string
+}
+
+export interface GetDraftsResponse extends ApiEnvelope {
+  drafts?: TransferDraft[]
+}
+
+export interface SaveDraftResponse extends ApiEnvelope {
+  draft?: TransferDraft
+}
+
+/** A book of blank cheque leaves bought against one account. */
+export interface ChequeBook {
+  bookid: string
+  onebankid: string
+  number: string
+  accountid: string
+  boughtat: string
+  used: number
+  total: number
+}
+
+export interface GetChequeBooksResponse extends ApiEnvelope {
+  books?: ChequeBook[]
+}
+
+export interface TransferRequest {
+  kind: TransferKind
+  fromaccountid: string
+  items: TransferItem[]
+  /** `YYYY-MM-DD HH:mm:ss`; absent means now. */
+  schedule?: string
+}
+
+export interface SubmitTransactionResponse extends ApiEnvelope {
+  item?: TransactionInfo
+}
+
+export interface LookupAccountResponse extends ApiEnvelope {
+  name?: string
+  ccy?: string
+}
+
+export interface Recipient {
+  recipientid: string
+  name: string
+  account: string
+  ccy: string
+  bank: string
+  favourite: boolean
+}
+
+export interface GetRecipientsResponse extends ApiEnvelope {
+  recipients?: Recipient[]
+}
+
+export interface Biller {
+  billerid: string
+  kind: 'ELECTRICITY' | 'WATER' | 'PHONE'
+  name: string
+  /** File under `public/`. */
+  logo: string
+}
+
+export interface GetBillersResponse extends ApiEnvelope {
+  billers?: Biller[]
+}
+
+/** What a utility says is owed on a customer number. */
+export interface LookupBillResponse extends ApiEnvelope {
+  customername?: string
+  address?: string
+  amountdue?: number
+  period?: string
+}
+
+export interface PayBillRequest {
+  billerid: string
+  /** Meter / customer number, or the phone number for a top-up. */
+  customerno: string
+  amount: number
+  fromaccountid: string
+}
+
+export interface Cheque {
+  chequeid: string
+  onebankid: string
+  number: string
+  accountid: string
+  payee: string
+  amount: number
+  ccy: string
+  issuedate: string
+  duedate: string
+  memo: string
+  status: 'ISSUED' | 'CASHED' | 'CANCELLED'
+  /** CASH pays whoever presents it; ACCOUNT pays only into `payeeaccount`. */
+  kind?: 'CASH' | 'ACCOUNT'
+  payeeaccount?: string
+  /** Funds are held on the account until the cheque is cashed. */
+  blockfunds?: boolean
+  /** `ISSUED` by this group, or `RECEIVED` from someone else. */
+  direction?: 'ISSUED' | 'RECEIVED'
+  bookid?: string
+}
+
+export interface GetChequesResponse extends ApiEnvelope {
+  cheques?: Cheque[]
+  /** Blank cheque leaves left in the group's book. */
+  remaining?: number
+}
+
+export interface CreateChequeRequest {
+  accountid: string
+  payee: string
+  amount: number
+  duedate: string
+  memo: string
+  kind?: 'CASH' | 'ACCOUNT'
+  payeeaccount?: string
+  blockfunds?: boolean
+  bookid?: string
+}
+
+export interface CreateChequeResponse extends ApiEnvelope {
+  cheque?: Cheque
+}
+
+/** A notification in the group's inbox; most point at a transaction. */
+export interface Message {
+  messageid: string
+  onebankid: string
+  time: string
+  title: string
+  transactionid: string
+  account: string
+  accountname: string
+  toaccount: string
+  amount: number
+  ccy: string
+  service: string
+  status: string
+  maker: string
+  usertype: string
+  read: boolean
+}
+
+export interface GetMessagesResponse extends ApiEnvelope {
+  messages?: Message[]
+}
+
+export interface SavePermissionResponse extends ApiEnvelope {
+  permission?: Permission
 }

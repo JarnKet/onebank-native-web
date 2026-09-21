@@ -7,7 +7,6 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { get } from 'svelte/store'
 import { setTransport } from '../lib/api/client'
 import { currentGroup, onebankGroups } from './onebankGroups'
-import { popups } from './popup'
 import { loginData } from './session'
 import { groups, groupsLoading, idVerified, isVerified, refreshGroups, seedFromLogin, selectGroup } from './groups'
 
@@ -32,7 +31,6 @@ beforeEach(() => {
   groupsLoading.set(true)
   currentGroup.set('')
   onebankGroups.set({})
-  popups.set([])
   loginData.set(undefined as any)
 })
 
@@ -173,17 +171,6 @@ describe('refreshing from the core', () => {
     expect(get(groups).map((g) => g.onebankid)).toEqual(['A'])
   })
 
-  /**
-   * `closePopup` refreshes on the way out while an overlay is still stacked and
-   * may still be awaiting its result. Tearing the stack down here would drop it.
-   */
-  it('leaves the overlay stack alone', async () => {
-    popups.set([{ id: '1', src: 'x', isVisible: true, callbackid: 'cb', isBcelOne: true } as any])
-    reply = { result: 0, groups: [G('A')] }
-    await refreshGroups()
-    expect(get(popups)).toHaveLength(1)
-  })
-
   it('clears the loading flag even when the call fails', async () => {
     setTransport(async () => {
       throw new Error('offline')
@@ -194,10 +181,8 @@ describe('refreshing from the core', () => {
 })
 
 describe('selecting a group', () => {
-  it('makes it active and closes overlays that belonged to the old one', () => {
-    popups.set([{ id: '1', src: 'x', isVisible: true, callbackid: null, isBcelOne: true } as any])
+  it('makes it active', () => {
     selectGroup('B')
     expect(get(currentGroup)).toBe('B')
-    expect(get(popups)).toEqual([])
   })
 })

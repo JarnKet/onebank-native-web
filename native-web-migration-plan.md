@@ -1,3 +1,5 @@
+> **Superseded (2026-09-21).** This plan describes porting the iframe-based app page by page. The app has since been rebuilt as a standalone front end on mock data, matching the Figma design, with no iframes and no core connection. Kept as history; see `PRODUCT.md`, `DESIGN.md` and `CLAUDE.md` for the current state.
+
 # OneBank Web: fork from onebank-ui and build the web app natively here
 
 ## Context

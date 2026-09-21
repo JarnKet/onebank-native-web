@@ -1,16 +1,15 @@
 <script lang="ts">
     /**
-     * One account in the group: balance, badges, and what can be done to it.
+     * One account in the group, as the design's manage-account card draws it:
+     * avatar, number (or alias), holder, balance, then the currency and type
+     * pills — with the alias field inline for the two account types that have
+     * one. Copy, show/hide and remove sit top right, with the lock toggle
+     * beside them.
      *
-     * From onebank-ui `ACCOUNT/components/web/WebHome.svelte`, which renders
-     * this inline. Two things are collapsed on the way over: its alias block
-     * appears twice in near-identical branches (the second only disables the
-     * save button on an empty value), and its account-number reveal is
-     * suppressed for accounts whose name contains "Onecash" — kept, since the
-     * core has no other flag for that.
+     * Onecash accounts keep mobile's rule: their number is not shown or copied.
      */
     import Icon from '@iconify/svelte';
-    import {maskAccount, t} from '../../lib/utils/helper';
+    import {initials, maskAccount, money, t} from '../../lib/utils/helper';
     import type {Account} from '../../definition';
 
     let {
@@ -21,39 +20,34 @@
         onAliasSave,
     }: {
         account: Account
-        /** A request for this account is in flight; its menu actions are inert. */
+        /** A request for this account is in flight; its actions are inert. */
         busy?: boolean
         onLockToggle: (account: Account) => void
         onRemove: (account: Account) => void
         onAliasSave: (account: Account, alias: string) => Promise<boolean>
     } = $props();
 
-    const CCY_SYMBOL: Record<string, string> = {LAK: '₭', USD: '$', THB: '฿', CNY: '¥'};
-    const CCY_BADGE: Record<string, string> = {
-        LAK: 'bg-red-100 text-red-700',
-        USD: 'bg-green-100 text-green-700',
-        THB: 'bg-purple-100 text-purple-700',
-        CNY: 'bg-yellow-100 text-yellow-700',
+    const TYPE_LABEL: Record<string, [string, string]> = {
+        VIRTUAL: ['Main account', 'ບັນຊີຫຼັກ'],
+        SHADOW: ['Shadow account', 'ບັນຊີເງົາ'],
+        SAVING: ['Saving', 'ເງິນຝາກປະຢັດ'],
+        CURRENT: ['Current', 'ກະແສລາຍວັນ'],
+        STANDARD: ['Standard', 'ມາດຕະຖານ'],
     };
+    const CCY_COLOR: Record<string, string> = {LAK: '#03a9f4', USD: '#00c853', THB: '#ff8f00', CNY: '#e53935'};
 
     let revealed = $state(false);
-    let menuOpen = $state(false);
     let editingAlias = $state(false);
     let aliasDraft = $state('');
     let savingAlias = $state(false);
     let copied = $state(false);
 
     const locked = $derived(account.status === 'LOCKED');
-    // Only these two carry an alias; a real account is named by the core.
+    // Only these two carry an alias; a real account is named by the bank.
     const aliasable = $derived(account.type === 'SHADOW' || account.type === 'VIRTUAL');
     const shown = $derived(revealed ? account.account : maskAccount(account.account));
-    // Onecash accounts are not the user's to read out; mobile hides the number
-    // and the copy button for them.
     const readable = $derived(!(account.name ?? '').includes('Onecash'));
-
-    function money(value: number | undefined): string {
-        return (value ?? 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-    }
+    const typeLabel = $derived(TYPE_LABEL[account.type] ?? [account.type, account.type]);
 
     async function copy() {
         try {
@@ -61,8 +55,7 @@
             copied = true;
             setTimeout(() => (copied = false), 1500);
         } catch {
-            // A denied clipboard permission is not worth an error state; the
-            // number is on screen and can be selected.
+            // A denied clipboard is not worth an error state; the number is on screen.
         }
     }
 
@@ -80,160 +73,80 @@
     }
 </script>
 
-<div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition-all duration-300 hover:border-gray-300 hover:shadow">
-    <div class="mb-4 flex items-start justify-between gap-2">
-        <div class="flex min-w-0 items-center gap-3">
-            <img src="img/ic_no_face.svg" class="h-12 w-12 flex-shrink-0 rounded-md" alt=""/>
-            <div class="min-w-0">
-                <h4 class="mb-0.5 truncate text-lg font-semibold text-gray-900">{shown}</h4>
-                <p class="truncate text-sm text-gray-600">{account.name}</p>
-            </div>
-        </div>
+<article class="ob-card flex gap-5 p-5">
+    <span class="flex h-17.5 w-17.5 shrink-0 items-center justify-center rounded-full bg-onebank-light-grey-4 text-lg font-semibold text-white">
+        {initials(account.alias || account.name)}
+    </span>
 
-        <div class="flex flex-shrink-0 items-center gap-1">
-            {#if readable}
-                <button
-                        class="rounded-lg p-1.5 transition-colors hover:bg-gray-100"
-                        title={copied ? t('Copied', 'ສຳເນົາແລ້ວ') : t('Copy account number', 'ສຳເນົາເລກບັນຊີ')}
-                        aria-label={t('Copy account number', 'ສຳເນົາເລກບັນຊີ')}
-                        onclick={copy}
-                >
-                    <Icon icon={copied ? 'mdi:check' : 'mdi:content-copy'} class="h-4 w-4 {copied ? 'text-green-600' : 'text-gray-600'}" width={16} height={16}/>
-                </button>
-                <button
-                        class="rounded-lg p-1.5 transition-colors hover:bg-gray-100"
-                        title={revealed ? t('Hide account number', 'ເຊື່ອງເລກບັນຊີ') : t('Show account number', 'ສະແດງເລກບັນຊີ')}
-                        aria-label={revealed ? t('Hide account number', 'ເຊື່ອງເລກບັນຊີ') : t('Show account number', 'ສະແດງເລກບັນຊີ')}
-                        onclick={() => (revealed = !revealed)}
-                >
-                    <Icon icon={revealed ? 'mdi:eye-off-outline' : 'mdi:eye-outline'} class="h-4 w-4 text-gray-500" width={16} height={16}/>
-                </button>
-            {/if}
-
-            <div class="relative">
-                <button
-                        class="rounded-lg p-1.5 transition-colors hover:bg-gray-100"
-                        title={t('More actions', 'ການດຳເນີນການເພີ່ມເຕີມ')}
-                        aria-label={t('More actions', 'ການດຳເນີນການເພີ່ມເຕີມ')}
-                        aria-haspopup="true"
-                        aria-expanded={menuOpen}
-                        onclick={() => (menuOpen = !menuOpen)}
-                >
-                    <Icon icon="mdi:dots-vertical" class="h-4 w-4 text-gray-600" width={16} height={16}/>
-                </button>
-
-                {#if menuOpen}
-                    <button
-                            type="button"
-                            class="fixed inset-0 z-10 cursor-default"
-                            aria-label={t('Close menu', 'ປິດເມນູ')}
-                            onclick={() => (menuOpen = false)}
-                    ></button>
-                    <div class="absolute right-0 top-full z-20 mt-1 w-48 rounded-lg border border-gray-200 bg-white py-1 shadow-lg" role="menu">
-                        <button
-                                class="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50"
-                                role="menuitem"
-                                disabled={busy}
-                                onclick={() => { menuOpen = false; onLockToggle(account) }}
-                        >
-                            <Icon
-                                    icon={busy ? 'mdi:loading' : locked ? 'mdi:lock-open-outline' : 'mdi:lock-outline'}
-                                    class="h-4 w-4 {busy ? 'animate-spin text-gray-500' : locked ? 'text-green-500' : 'text-orange-500'}"
-                                    width={16}
-                                    height={16}
-                            />
-                            {locked ? t('Unlock account', 'ປົດລ໋ອກບັນຊີ') : t('Lock account', 'ລ໋ອກບັນຊີ')}
-                        </button>
-                        <div class="my-1 border-t border-gray-100"></div>
-                        <button
-                                class="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 disabled:opacity-50"
-                                role="menuitem"
-                                disabled={busy}
-                                onclick={() => { menuOpen = false; onRemove(account) }}
-                        >
-                            <Icon icon="mdi:delete-outline" class="h-4 w-4" width={16} height={16}/>
-                            {t('Remove account', 'ລົບບັນຊີ')}
-                        </button>
-                    </div>
+    <div class="min-w-0 flex-1">
+        <div class="flex items-start gap-2">
+            <h3 class="min-w-0 flex-1 truncate pt-1 text-xl font-bold">{aliasable && account.alias ? account.alias.toUpperCase() : shown}</h3>
+            <div class="flex shrink-0 items-center gap-1.5">
+                {#if readable}
+                    <button type="button" class="rounded-full p-1 transition-colors hover:bg-onebank-page"
+                            title={copied ? t('Copied', 'ສຳເນົາແລ້ວ') : t('Copy account number', 'ສຳເນົາເລກບັນຊີ')}
+                            aria-label={t('Copy account number', 'ສຳເນົາເລກບັນຊີ')} onclick={copy}>
+                        <Icon icon={copied ? 'mdi:check' : 'mdi:content-copy'} class="h-6 w-6 {copied ? 'text-green-600' : ''}"/>
+                    </button>
+                    <button type="button" class="rounded-full p-1 transition-colors hover:bg-onebank-page"
+                            aria-label={revealed ? t('Hide account number', 'ເຊື່ອງເລກບັນຊີ') : t('Show account number', 'ສະແດງເລກບັນຊີ')}
+                            onclick={() => (revealed = !revealed)}>
+                        <Icon icon={revealed ? 'mdi:eye-off-outline' : 'mdi:eye-outline'} class="h-6 w-6"/>
+                    </button>
                 {/if}
+                <button type="button" class="rounded-full p-1 transition-colors hover:bg-onebank-page disabled:opacity-40"
+                        aria-label={locked ? t('Unlock account', 'ປົດລັອກບັນຊີ') : t('Lock account', 'ລັອກບັນຊີ')}
+                        title={locked ? t('Unlock account', 'ປົດລັອກບັນຊີ') : t('Lock account', 'ລັອກບັນຊີ')}
+                        disabled={busy} onclick={() => onLockToggle(account)}>
+                    <Icon icon={busy ? 'mdi:loading' : locked ? 'mdi:lock' : 'mdi:lock-open-variant-outline'}
+                          class="h-6 w-6 {busy ? 'animate-spin' : locked ? 'text-onebank-red' : ''}"/>
+                </button>
+                <button type="button" class="rounded-full p-1 transition-colors hover:bg-onebank-page disabled:opacity-40"
+                        aria-label={t('Remove account', 'ລຶບບັນຊີ')} title={t('Remove account', 'ລຶບບັນຊີ')}
+                        disabled={busy} onclick={() => onRemove(account)}>
+                    <Icon icon="mdi:close-circle-outline" class="h-6 w-6"/>
+                </button>
             </div>
         </div>
-    </div>
+        {#if aliasable && account.alias}<p class="text-sm text-onebank-subtle">{shown}</p>{/if}
+        <p class="mt-1 truncate text-base">{account.name}</p>
+        <p class="mt-1 text-base tabular-nums">{money(account.availablebalance, account.ccy)}</p>
 
-    <div class="mb-4 rounded-lg bg-gray-50 px-4 py-3">
-        <p class="mb-0.5 text-xs text-gray-500">{t('Available Balance', 'ຍອດເງິນທີ່ໃຊ້ໄດ້')}</p>
-        <p class="truncate text-xl font-bold text-gray-900">
-            {money((account as any).availablebalance)}
-            {CCY_SYMBOL[account.ccy] ?? account.ccy}
-        </p>
-        <div class="mt-2 flex flex-wrap gap-2">
-            <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium {CCY_BADGE[account.ccy] ?? 'bg-gray-200 text-black'}">
-                {account.ccy}
-            </span>
-            <span class="inline-flex items-center rounded-full bg-gray-200 px-3 py-1 text-xs font-medium text-black">{account.type}</span>
-            <span
-                    class="inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium {locked
-                        ? 'border-red-200 bg-red-100 text-red-700'
-                        : 'border-green-200 bg-green-100 text-green-700'}"
-            >
-                <Icon icon={locked ? 'mdi:lock' : 'mdi:check-circle'} class="mr-1 h-3 w-3" width={12} height={12}/>
-                {account.status}
-            </span>
-        </div>
-    </div>
-
-    {#if aliasable}
-        <div class="flex items-center justify-between gap-2 rounded-lg border border-gray-200 p-3">
-            <span class="flex items-center gap-2 text-sm font-medium">
-                <Icon icon="mdi:tag-outline" class="h-4 w-4" width={16} height={16}/>
-                {t('Alias', 'ຊື່ເອີ້ນບັນຊີ')}
-            </span>
-
-            {#if editingAlias}
-                <div class="flex items-center gap-2">
-                    <input
-                            type="text"
-                            bind:value={aliasDraft}
-                            maxlength="50"
-                            disabled={savingAlias}
-                            placeholder={t('Enter alias', 'ປ້ອນຊື່ເອີ້ນ')}
-                            aria-label={t('Alias', 'ຊື່ເອີ້ນບັນຊີ')}
-                            class="rounded border border-gray-300 bg-white px-2 py-1 text-sm focus:border-onebank-red focus:outline-none focus:ring-1 focus:ring-onebank-red"
-                    />
-                    <button
-                            type="button"
-                            class="rounded p-1 text-green-600 hover:bg-green-100 disabled:opacity-50"
-                            title={t('Save', 'ບັນທຶກ')}
-                            aria-label={t('Save', 'ບັນທຶກ')}
-                            disabled={savingAlias}
-                            onclick={saveAlias}
-                    >
-                        <Icon icon={savingAlias ? 'mdi:loading' : 'mdi:check'} class="h-4 w-4 {savingAlias ? 'animate-spin' : ''}" width={16} height={16}/>
-                    </button>
-                    <button
-                            type="button"
-                            class="rounded p-1 text-gray-600 hover:bg-gray-100 disabled:opacity-50"
-                            title={t('Cancel', 'ຍົກເລີກ')}
-                            aria-label={t('Cancel', 'ຍົກເລີກ')}
-                            disabled={savingAlias}
-                            onclick={() => (editingAlias = false)}
-                    >
-                        <Icon icon="mdi:close" class="h-4 w-4" width={16} height={16}/>
-                    </button>
+        <div class="mt-4 flex flex-wrap items-center gap-3">
+            {#if aliasable}
+                <div class="flex h-11.5 min-w-0 flex-1 basis-56 items-center gap-3 rounded-ob-sm border border-black px-4">
+                    <span class="shrink-0 text-base">{t('Alias', 'ຊື່ເອີ້ນບັນຊີ')}</span>
+                    {#if editingAlias}
+                        <input type="text" bind:value={aliasDraft} maxlength="50" disabled={savingAlias}
+                               placeholder={t('Enter alias', 'ປ້ອນຊື່ເອີ້ນ')} aria-label={t('Alias', 'ຊື່ເອີ້ນບັນຊີ')}
+                               onkeydown={(event) => { if (event.key === 'Enter') void saveAlias(); if (event.key === 'Escape') editingAlias = false; }}
+                               class="min-w-0 flex-1 border-0 p-0 text-base text-accent focus:ring-0"/>
+                        <button type="button" aria-label={t('Save', 'ບັນທຶກ')} disabled={savingAlias} onclick={saveAlias}>
+                            <Icon icon={savingAlias ? 'mdi:loading' : 'mdi:check'} class="h-5 w-5 text-green-600 {savingAlias ? 'animate-spin' : ''}"/>
+                        </button>
+                        <button type="button" aria-label={t('Cancel', 'ຍົກເລີກ')} disabled={savingAlias} onclick={() => (editingAlias = false)}>
+                            <Icon icon="mdi:close" class="h-5 w-5"/>
+                        </button>
+                    {:else}
+                        <button type="button" class="min-w-0 flex-1 truncate text-left text-base {account.alias ? 'text-accent' : 'text-onebank-muted'}"
+                                aria-label={account.alias ? t('Edit alias', 'ແກ້ໄຂຊື່ເອີ້ນ') : t('Add alias', 'ເພີ່ມຊື່ເອີ້ນ')}
+                                onclick={startEditing}>
+                            {account.alias || t('Not set yet', 'ຍັງບໍ່ໄດ້ຕັ້ງຊື່')}
+                        </button>
+                    {/if}
                 </div>
-            {:else if account.alias}
-                <div class="flex items-center gap-2">
-                    <span class="text-sm font-semibold text-accent">{account.alias}</span>
-                    <button type="button" class="rounded p-1 hover:bg-gray-100" title={t('Edit alias', 'ແກ້ໄຂຊື່ເອີ້ນ')} aria-label={t('Edit alias', 'ແກ້ໄຂຊື່ເອີ້ນ')} onclick={startEditing}>
-                        <Icon icon="mdi:pencil" class="h-3 w-3" width={12} height={12}/>
-                    </button>
-                </div>
-            {:else}
-                <button type="button" class="flex items-center gap-1 rounded text-sm font-medium text-accent hover:bg-gray-100" onclick={startEditing}>
-                    <Icon icon="mdi:plus" class="h-3 w-3" width={12} height={12}/>
-                    {t('Add alias', 'ເພີ່ມຊື່ເອີ້ນ')}
-                </button>
+            {/if}
+            <span class="inline-flex h-8.5 w-25 items-center justify-center rounded-full text-base text-white"
+                  style="background-color: {CCY_COLOR[account.ccy] ?? '#9d9fa3'}">{account.ccy}</span>
+            <span class="inline-flex h-8.5 items-center justify-center rounded-full px-5 text-base
+                         {account.type === 'VIRTUAL' ? 'bg-onebank-blue text-white' : 'bg-onebank-light-grey-2 text-black'}">
+                {t(typeLabel[0], typeLabel[1])}
+            </span>
+            {#if locked}
+                <span class="inline-flex h-8.5 items-center gap-1 rounded-full bg-red-100 px-4 text-sm font-medium text-red-700">
+                    <Icon icon="mdi:lock" class="h-4 w-4"/>{t('Locked', 'ລັອກ')}
+                </span>
             {/if}
         </div>
-    {/if}
-</div>
+    </div>
+</article>

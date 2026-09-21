@@ -58,6 +58,36 @@ if (typeof globalThis.matchMedia === 'undefined') {
   })) as unknown as typeof matchMedia
 }
 
+/**
+ * jsdom has no Web Animations API, and Svelte transitions (`fade`, `scale` on
+ * every dialog and menu) call `element.animate` the moment one opens. The stub
+ * finishes at once, which is what a test wants from an animation anyway.
+ */
+if (typeof Element !== 'undefined' && typeof Element.prototype.animate !== 'function') {
+  Element.prototype.animate = function () {
+    const animation = {
+      onfinish: null as null | (() => void),
+      finished: Promise.resolve(),
+      cancel() {},
+      finish() {},
+      play() {},
+      pause() {},
+      reverse() {},
+      currentTime: 0,
+      playState: 'finished',
+    }
+    queueMicrotask(() => animation.onfinish?.())
+    return animation as unknown as Animation
+  }
+}
+
+/**
+ * Tests assert on English copy. The app defaults to Lao, and `t()` resolves the
+ * language once at import time, so this has to be in place before any test
+ * file imports the app — top level here, not in a `beforeEach`.
+ */
+localStorage.setItem('lang', '0')
+
 beforeEach(() => {
   localStorage.clear()
   sessionStorage.clear()

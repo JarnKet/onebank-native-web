@@ -1,36 +1,47 @@
 import { describe, expect, it } from 'vitest'
-import { encryptPassword, getProfileImageUrl } from './helper'
+import { formatMoney, getProfileImageUrl, initials, maskAccount } from './helper'
 
-describe('encryptPassword', () => {
-  it('is deterministic for the same input', () => {
-    expect(encryptPassword('hunter2')).toBe(encryptPassword('hunter2'))
+describe('maskAccount', () => {
+  it('hides the middle of an 18-digit account', () => {
+    expect(maskAccount('010120000123456789')).toBe('010-12-00xxxxx-456-789')
   })
 
-  it('produces base64 of a SHA-1 digest (28 chars)', () => {
-    const hash = encryptPassword('hunter2')
-    expect(hash).toMatch(/^[A-Za-z0-9+/]+=*$/)
-    expect(hash).toHaveLength(28)
+  it('masks a shadow account by its tail', () => {
+    expect(maskAccount('SHA000000000000123')).toBe('SHA-xx00-123')
   })
 
-  it('separates different passwords', () => {
-    expect(encryptPassword('a')).not.toBe(encryptPassword('b'))
+  it('has a placeholder for no account', () => {
+    expect(maskAccount(undefined)).toBe('xxxxx-xxxxx-xxxxx')
+  })
+})
+
+describe('formatMoney', () => {
+  it('groups thousands and keeps two decimals', () => {
+    expect(formatMoney(162840960.5)).toBe('162,840,960.50')
+  })
+
+  it('treats nonsense as zero rather than printing NaN', () => {
+    expect(formatMoney('abc')).toBe('0.00')
+  })
+})
+
+describe('initials', () => {
+  it('takes the first letter of the first two words', () => {
+    expect(initials('manilitphone thephavanh')).toBe('MT')
+  })
+
+  it('has a placeholder for no name', () => {
+    expect(initials('')).toBe('?')
   })
 })
 
 describe('getProfileImageUrl', () => {
-  it('routes type 1 to the upload host with the profile id', () => {
-    expect(getProfileImageUrl(1, 'abc', 'face', '')).toBe('https://public2.bcel.one/upload/abc')
+  it('uses a picked picture', () => {
+    expect(getProfileImageUrl(1, 'data:image/png;base64,AAA')).toBe('data:image/png;base64,AAA')
   })
 
-  it('applies the size prefix', () => {
-    expect(getProfileImageUrl(1, 'abc', 'face', 't.')).toBe('https://public2.bcel.one/upload/t.abc')
-  })
-
-  it('routes type 2 to the faceid host', () => {
-    expect(getProfileImageUrl(2, 'abc', 'face', 'm.')).toBe('https://bcel.la:8083/uploadfaceid/m.face')
-  })
-
-  it('falls back to the local placeholder for unknown types', () => {
-    expect(getProfileImageUrl(0, 'abc', 'face', '')).toBe('img/ic_no_face.svg')
+  it('falls back to the placeholder', () => {
+    expect(getProfileImageUrl(1, 'abc')).toBe('img/ic_no_face.svg')
+    expect(getProfileImageUrl(undefined, undefined as any)).toBe('img/ic_no_face.svg')
   })
 })

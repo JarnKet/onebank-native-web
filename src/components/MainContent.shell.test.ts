@@ -13,7 +13,6 @@ import MainContent from './MainContent.svelte'
 import { setTransport } from '../lib/api/client'
 import { currentGroup, onebankGroups } from '../stores/onebankGroups'
 import { groups, groupsLoading, idVerified } from '../stores/groups'
-import { displaySidebar } from '../stores/ui'
 
 let host: HTMLElement
 let app: Record<string, any> | null = null
@@ -37,12 +36,13 @@ async function settle(): Promise<void> {
 }
 
 beforeEach(async () => {
-  setTransport(async () => ({ result: 0 }))
+  setTransport(async (_service, data) =>
+    data.command === 'loadgroups' ? { result: 0, groups: [{ onebankid: 'G-42', name: 'Ops' }] } : { result: 0 },
+  )
   currentGroup.set('G-42')
   idVerified.set(true)
   groupsLoading.set(false)
   groups.set([{ onebankid: 'G-42' } as any])
-  displaySidebar.set(true)
   onebankGroups.set({
     'G-42': {
       isFinishLoad: true,
@@ -79,9 +79,9 @@ describe('the authenticated shell', () => {
     expect(host.innerHTML.trim(), 'the shell mounted to an empty page').not.toBe('')
   })
 
-  it('renders the sidebar rail', () => {
-    // The sidebar's cards are the rail; a blank shell has none of them.
-    expect(host.querySelectorAll('.onebank-card').length).toBeGreaterThan(0)
+  it('renders the top bar and the sidebar cards', () => {
+    expect(host.querySelector('header'), 'no top bar').not.toBeNull()
+    expect(host.querySelectorAll('.ob-card').length).toBeGreaterThan(0)
   })
 
   it('renders the sidebar rail with a menu, skeleton or otherwise', () => {
@@ -97,8 +97,8 @@ describe('the authenticated shell', () => {
     expect(content?.textContent?.trim(), 'the routed page rendered nothing').not.toBe('')
   })
 
-  it('offsets the content column for the sidebar', () => {
-    const content = host.querySelector('main') as HTMLElement
-    expect(content.className).toMatch(/ml-\[(300|80)px\]|ml-0/)
+  it('shows the group as a tab in the top bar', () => {
+    const tab = host.querySelector('header [aria-current="true"]')
+    expect(tab?.textContent).toContain('Ops')
   })
 })

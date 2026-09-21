@@ -43,6 +43,13 @@
 
     const accounts = $derived($loadHomeResult?.accounts ?? []);
 
+    /** The three "add" buttons under the list (black in the Figma, navy-outlined here). */
+    const addActions: Array<{label: string; panel: Panel}> = [
+        {label: t('Add main account', 'ເພີ່ມບັນຊີຫຼັກ'), panel: {kind: 'open-new', accountType: 'VIRTUAL'}},
+        {label: t('Add shadow account', 'ເພີ່ມບັນຊີເງົາ'), panel: {kind: 'open-new', accountType: 'SHADOW'}},
+        {label: t('Add from a personal account', 'ເພີ່ມບັນຊີຈາກບັນຊີສ່ວນຕົວ'), panel: {kind: 'add-existing'}},
+    ];
+
     async function refresh(group: string) {
         if (!group) return;
         loading = true;
@@ -167,17 +174,17 @@
     );
 </script>
 
-<div class="h-full w-full overflow-y-auto p-4 tablet:p-6 desktop:p-8">
-    <div class="mx-auto max-w-5xl space-y-4">
+<div class="w-full">
+    <div class="space-y-4">
         {#if error}
-            <div class="flex items-center justify-between gap-3 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+            <div class="flex items-center justify-between gap-3 rounded-ob-sm bg-red-50 p-3 text-sm text-red-700" role="alert">
                 <span>{error}</span>
                 <button class="underline" onclick={() => refresh($currentGroup)}>{t('Retry', 'ລອງໃໝ່')}</button>
             </div>
         {/if}
 
         {#if notice}
-            <div class="flex items-center justify-between gap-3 rounded-lg bg-green-50 p-3 text-sm text-green-700">
+            <div class="flex items-center justify-between gap-3 rounded-ob-sm bg-green-50 p-3 text-sm text-green-700" role="status">
                 <span class="flex items-center gap-2">
                     <Icon icon="mdi:check-circle" width={16} height={16}/>
                     {notice}
@@ -199,20 +206,20 @@
                     onCancel={() => (panel = {kind: 'list'})}
             />
         {:else}
-            <h1 class="text-xl font-semibold text-gray-800">{t('Accounts', 'ບັນຊີທີ່ຈະໃຊ້ເບິ່ງ ຫລື ເຄື່ອນໄຫວ')}</h1>
+            <h1 class="text-2xl font-semibold">{t('Accounts for viewing or transacting', 'ບັນຊີທີ່ຈະໃຊ້ເບິ່ງ ຫຼື ເຄື່ອນໄຫວ')}</h1>
 
             {#if loading && accounts.length === 0}
-                <div class="grid grid-cols-1 gap-4 tablet:grid-cols-2" aria-busy="true">
+                <div class="grid grid-cols-1 gap-3 desktop:grid-cols-2" aria-busy="true">
                     {#each Array(2) as _, i (i)}
-                        <div class="h-56 animate-pulse rounded-xl bg-gray-100"></div>
+                        <div class="h-44 animate-pulse rounded-ob-xl bg-white"></div>
                     {/each}
                 </div>
             {:else if accounts.length === 0}
-                <div class="rounded-xl border border-gray-200 bg-white p-8 text-center text-gray-500">
+                <div class="ob-card p-8 text-center text-onebank-subtle">
                     {t('This group holds no account yet.', 'ກຸ່ມນີ້ຍັງບໍ່ມີບັນຊີ')}
                 </div>
             {:else}
-                <div class="grid grid-cols-1 gap-4 tablet:grid-cols-2">
+                <div class="grid grid-cols-1 gap-3 desktop:grid-cols-2">
                     {#each accounts as account (account.accountid)}
                         <AccountCard
                                 {account}
@@ -225,19 +232,14 @@
                 </div>
             {/if}
 
-            <div class="flex flex-col gap-3 border-t border-gray-200 pt-4 tablet:flex-row">
-                <button class="onebank-secondary-btn" onclick={() => (panel = {kind: 'open-new', accountType: 'VIRTUAL'})}>
-                    <Icon icon="mdi:plus" class="mr-2 h-4 w-4" width={16} height={16}/>
-                    {t('Add Virtual Account', 'ເພີ່ມບັນຊີຫລັກ')}
-                </button>
-                <button class="onebank-secondary-btn" onclick={() => (panel = {kind: 'open-new', accountType: 'SHADOW'})}>
-                    <Icon icon="mdi:plus" class="mr-2 h-4 w-4" width={16} height={16}/>
-                    {t('Add Shadow Account', 'ເພີ່ມບັນຊີເງົາ')}
-                </button>
-                <button class="onebank-secondary-btn" onclick={() => (panel = {kind: 'add-existing'})}>
-                    <Icon icon="mdi:plus" class="mr-2 h-4 w-4" width={16} height={16}/>
-                    {t('Add from personal account', 'ເພີ່ມບັນຊີ ຈາກບັນຊີສ່ວນຕົວ')}
-                </button>
+            <div class="grid grid-cols-1 gap-4 pt-10 tablet:grid-cols-3 desktop:px-14">
+                {#each addActions as action (action.label)}
+                    <button type="button" class="flex h-15 items-center justify-center gap-3 rounded-ob-xl border-2 border-onebank-blue bg-white text-onebank-blue hover:bg-onebank-blue-soft px-4 text-xl font-bold transition-colors"
+                            onclick={() => (panel = action.panel)}>
+                        <Icon icon="mdi:plus-circle" class="h-6 w-6 shrink-0"/>
+                        <span class="truncate">{action.label}</span>
+                    </button>
+                {/each}
             </div>
         {/if}
     </div>
