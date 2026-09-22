@@ -36,7 +36,7 @@
             onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onclick?.() } }}
     >
         {#if hasPin}
-            <Icon icon="mdi:star" class="absolute right-1 top-1 h-4 w-4 rounded-full bg-orange-300 p-0.5 text-white"/>
+            <Icon icon="mdi:star" class="absolute right-1 top-1 h-4 w-4 rounded-full bg-onebank-red p-0.5 text-white"/>
         {/if}
         <img src="img/{menu.filename}" alt={menu.name} class="mx-auto h-12 w-12 object-contain tablet:h-14 tablet:w-14"/>
         <div class="mt-1 text-xs leading-tight text-gray-500 tablet:text-sm">{menu.name}</div>

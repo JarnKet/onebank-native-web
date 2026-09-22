@@ -136,26 +136,29 @@ Amounts always use `tabular-nums`.
 
 ## Screens → Figma frames
 
-| Screen | File | Frames |
-|---|---|---|
-| Home | `routes/Home.svelte` + `routes/home/*` | `1325:6978` ★ |
-| Create OneBank | `RegisterOneBank.svelte` | `1325:5575`, `5731`, `5636`, `5792` ★ |
-| Join / Leave group | `JoinGroup.svelte`, `LeaveGroup.svelte` | `1325:5314` / `1325:5371`, `5468` |
-| Edit group | `Group.svelte` | `1325:3532` |
-| Add member | `components/addmemberdialog/AddMemberDialog.svelte` | `1325:6`, `897`, `2142`, … ★ |
-| Manage members | `Members.svelte` | `1325:2511`, `2761`, `3017`, `3345` |
-| Accounts | `Account.svelte` + `account/*` | `1325:5865`, `6053`, `6186`, `6319` ★ |
-| Manage permissions | `Role.svelte` + `lib/components/PermissionEditor.svelte` | `1325:6818`, `6454` |
-| Messages | `Messages.svelte`, `MessageDetail.svelte` | `1325:5106`, `5214` |
-| Pending authorization | `Authorization.svelte`, `AuthorizationHistory.svelte` | `1325:7358`, `7548`, `7748`, `7767`, `7910` |
-| Statement | `Statement.svelte` | `1325:3640`, `3819` ★ |
-| Transfer (+ international, ID card) | `money/TransferForm.svelte` | `1421:922`, `1213`, `732` ★ · `1421:5` · `1421:281` |
-| Salary & file transfer | `Salary.svelte` | `1421:555`, `1325:19128` ★ |
-| E-Cheque | `ECheque.svelte` | `1325:9762`, `9215`, `9455`, `9610`, `9940` |
-| Electricity / Water | `BillPayment.svelte` | `1325:4047` / `1325:4786` |
-| Top-up | `TopUp.svelte` | `1325:4945` |
+| Screen | File | Frames | Status |
+|---|---|---|---|
+| Home | `routes/Home.svelte` + `routes/home/*` | `1325:6978` ★ | native |
+| Create OneBank | `RegisterOneBank.svelte` | `1325:5575`, `5731`, `5636`, `5792` ★ | native |
+| Join / Leave group | `JoinGroup.svelte`, `LeaveGroup.svelte` | `1325:5314` / `1325:5371`, `5468` | native |
+| Edit group | `Group.svelte` | `1325:3532` | native |
+| Add member | `components/addmemberdialog/AddMemberDialog.svelte` | `1325:6`, `897`, `2142`, … ★ | native (role step framed) |
+| Manage members | `Members.svelte` | `1325:2511`, `2761`, `3017`, `3345` | native |
+| Accounts | `Account.svelte` + `account/*` | `1325:5865`, `6053`, `6186`, `6319` ★ | native |
+| Manage permissions | `Role.svelte` + `lib/components/PermissionEditor.svelte` | `1325:6818`, `6454` | native (local fallback) |
+| Messages | `Messages.svelte`, `MessageDetail.svelte` | `1325:5106`, `5214` | native |
+| Pending authorization | `Authorization.svelte`, `AuthorizationHistory.svelte` | `1325:7358`, `7548`, `7748`, `7767`, `7910` | native (local fallback) |
+| Statement | `Statement.svelte` | `1325:3640`, `3819` ★ | native (local fallback) |
+| Transfer (+ international, ID card) | `money/TransferForm.svelte` | `1421:922`, `1213`, `732` ★ · `1421:5` · `1421:281` | native (local fallback) |
+| Salary & file transfer | `Salary.svelte` | `1421:555`, `1325:19128` ★ | native (local fallback) |
+| E-Cheque | `ECheque.svelte` | `1325:9762`, `9215`, `9455`, `9610`, `9940` | native (local fallback) |
+| Electricity / Water | `BillPayment.svelte` | `1325:4047` / `1325:4786` | native (local fallback) |
+| Top-up | `TopUp.svelte` | `1325:4945` | native (local fallback) |
+| iBank: account detail, slips, destination accounts, rates, term deposits, loans, alerts | `routes/ibank/*.svelte` | none | native, built from the patterns above (local fallback) |
 
 ★ = starred by the designer as final.
+
+**The iBank screens have no frame.** They follow the patterns table: a navy page title, white `.ob-card` panels, tables with the navy header row, `ListToolbar` for search, `Modal` for add/remove, navy tabs as E-Cheque draws them (`routes/ibank/Tabs.svelte`), switches (`role="switch"`) for alerts. Term deposits and loans are cards with a progress bar (time to maturity, share repaid) that open a detail in the same column. When a designer frames them, replace the layout and keep the data calls.
 
 **How faithful each screen is.** The Figma MCP's Starter-plan call limit was reached part-way through the build.
 
@@ -176,15 +179,15 @@ When the limit resets, compare the second and third groups frame by frame, and c
 
 Black survives only as translucent backdrops (`bg-black/40`) behind dialogs and drawers, and in the chart tooltip.
 
+**No gradients on controls or surfaces** (2026-09-22). Buttons, the bottom-nav pill and cards are flat brand colour; the old `.ob-gradient` utility is gone. Status chips use the palette: information (counts, view-only) in navy tint (`onebank-blue-soft` on `onebank-blue`), anything needing action or carrying a limit in pink/red (`onebank-pink` on `onebank-red`), "waiting for approval" in `onebank-pending`. Two exceptions: the chart's area fill, which fades under the line, and the login backdrop from its Figma frame.
+
 ## Where the design is silent (decisions)
 
 - **Loading** uses pulsing blocks shaped like the content, never a spinner on a blank page.
 - **Empty** states say what would be there and, where possible, what to do.
 - **Errors** appear inline at the point of failure, in red on `red-50`.
-- **Demo affordances** are dashed, low-emphasis boxes or underlined text links, so they never compete with the real primary action:
-  - "play the owner"
-  - "approve as the next approver"
-  - the demo codes
+- **Framed screens** keep the shell: a legacy page fills the content column inside an `.ob-card`, and overlays opened from menu tiles stack over the same column, so the top bar and sidebar stay in reach.
+- **Offline data** is announced, never hidden: a navy status bar above the screen (`LocalDataNotice`) whenever a command the core did not answer was answered locally.
 - **Home** is a fixed layout, as the frame draws it. The old draggable grid was retired, because it could not reproduce the design's composition. The shortcut tiles are the design's own customisation point, through "Add shortcut".
 - **Charts** are hand-drawn SVG with the dataviz rules:
   - a 2px line;
@@ -192,6 +195,7 @@ Black survives only as translucent backdrops (`bg-black/40`) behind dialogs and 
   - a crosshair tooltip in text ink.
   The Figma's chart images were screenshots, so the data and scales come from the account.
 - **Icons**: the design's own SVGs (in `public/img/ob/`) for the logo, shortcuts, services and chevrons; Iconify `mdi:*` elsewhere, matching the icon names the Figma's layers carry.
+- **iBank tile icons** (`public/img/ob/sv-account-detail`, `-beneficiary`, `-exchange`, `-interest`, `-international`, `-loan`, `-notification`, `-slip`, `-term-deposit`, `-transfer-id`) are drawn here, not exported: navy `#133D6B` 2px round-capped strokes with one red `#DD2319` accent, on a 36–44px canvas, so at 40px they sit at the weight of the Figma's filled icons. They replace the shared `ib-logo.png` onebank-ui used for the whole family.
 
 ## Accessibility (WCAG 2.2 AA)
 

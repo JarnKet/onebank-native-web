@@ -14,6 +14,7 @@ interface ImportMetaEnv {
   readonly VITE_SOCKET_HOST: string
   /** Milliseconds before a call to the core is abandoned. Default 20000 */
   readonly VITE_REQUEST_TIMEOUT_MS?: string
+  readonly VITE_UNMAPPED_TIMEOUT_MS?: string
   readonly VITE_SOCKET_PORT: string
   /** Comma-separated extra origins permitted to drive the iframe bridge */
   readonly VITE_EXTRA_FRAME_ORIGINS?: string

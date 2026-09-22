@@ -1,8 +1,7 @@
 <script lang="ts">
     import {untrack} from 'svelte';
-    import Router from 'svelte-spa-router';
     import Layout from './Layout.svelte';
-    import routes from '../routes';
+    import FrameContainer from './FrameContainer.svelte';
     import {refreshGroups, seedFromLogin} from '../stores/groups';
     import {currentGroup} from '../stores/onebankGroups';
     import {loadGroupHome} from '../stores/home';
@@ -32,5 +31,6 @@
 </script>
 
 <Layout sidebarExpanded={sidebarExpand} onToggleExpand={() => (sidebarExpand = !sidebarExpand)}>
-    <Router {routes}/>
+    <!-- The routed page, and the b1hybrid / onebank-ui overlays stacked on it. -->
+    <FrameContainer/>
 </Layout>

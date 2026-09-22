@@ -2,11 +2,8 @@
     /**
      * Something that looks like a QR code, drawn from `value`.
      *
-     * It encodes nothing: in this offline build there is no phone to scan it,
-     * and shipping a real encoder for a picture would be weight for nothing.
-     * The three finder squares and a stable pattern per value are enough for
-     * the login and e-cheque screens to read right. Swap in a real encoder
-     * when a real scanner exists.
+     * It encodes nothing. Used only by the unmapped E-Cheque screen's preview;
+     * swap in `QrCode` (a real encoder) when that screen is wired.
      */
     let {value, size = 224, label = 'QR code'}: {value: string; size?: number; label?: string} = $props();
 

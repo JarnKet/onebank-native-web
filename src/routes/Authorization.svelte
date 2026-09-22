@@ -7,7 +7,8 @@
     import Icon from '@iconify/svelte';
     import ApprovalCard from './authorization/ApprovalCard.svelte';
     import Modal from '../lib/components/Modal.svelte';
-    import {approveTransaction, archiveTransaction, cancelTransaction, rejectTransaction, simulateApproval, viewTransactions} from '../lib/api/commands';
+    import {viewTransactions} from '../lib/api/commands';
+    import {approveTransaction, archiveTransaction, cancelTransaction, rejectTransaction} from '../lib/api/unmapped';
     import type {TransactionInfo} from '../lib/api/types';
     import {t} from '../lib/utils/helper';
     import {navigateToPath} from '../lib/utils/navigation';
@@ -75,8 +76,8 @@
 
 <div class="grid items-start gap-4 desktop:grid-cols-2">
     {#each [
-        {title: t('Waiting for your approval', 'ລາຍການທີ່ທ່ານຕ້ອງອະນຸມັດ'), list: toApprove, mode: 'approver' as const, tab: 'approver', chip: 'bg-violet-100 text-violet-700'},
-        {title: t('Waiting for others', 'ລາຍການທີ່ລໍຖ້າອະນຸມັດ'), list: awaiting, mode: 'maker' as const, tab: 'mine', chip: 'bg-sky-100 text-sky-700'},
+        {title: t('Waiting for your approval', 'ລາຍການທີ່ທ່ານຕ້ອງອະນຸມັດ'), list: toApprove, mode: 'approver' as const, tab: 'approver', chip: 'bg-onebank-pink text-onebank-red'},
+        {title: t('Waiting for others', 'ລາຍການທີ່ລໍຖ້າອະນຸມັດ'), list: awaiting, mode: 'maker' as const, tab: 'mine', chip: 'bg-onebank-blue-soft text-onebank-blue'},
     ] as column (column.tab)}
         <section class="ob-card flex flex-col gap-3 p-4">
             <header class="flex items-center gap-3">
@@ -95,8 +96,7 @@
                                   onReject={() => { rejecting = tx; reason = ''; }}
                                   onEdit={() => edit(tx)}
                                   onCancel={() => act(tx, () => cancelTransaction(tx.transactionid!))}
-                                  onArchive={() => act(tx, () => archiveTransaction(tx.transactionid!))}
-                                  onSimulate={column.mode === 'maker' ? () => act(tx, () => simulateApproval(tx.transactionid!)) : undefined}/>
+                                  onArchive={() => act(tx, () => archiveTransaction(tx.transactionid!))}/>
                 {:else}
                     <p class="py-10 text-center text-sm text-onebank-subtle">{t('Nothing here right now', 'ບໍ່ມີລາຍການ')}</p>
                 {/each}

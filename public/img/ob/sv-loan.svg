@@ -1,0 +1,13 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="44" height="40" viewBox="0 0 44 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Layer_1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<g stroke="#133D6B">
+<rect x="2" y="24" width="7" height="14" rx="1"/>
+<path d="M9 26H15C17 26 19 27 21 28H28C30.5 28 30.5 32 28 32H20"/>
+<path d="M9 36H26L38 29C40 27.5 42.5 30 40.5 31.5L29 38.5H9"/>
+</g>
+<g stroke="#DD2319" stroke-width="2.5">
+<circle cx="29" cy="12" r="8"/>
+<path d="M29 8V16"/>
+</g>
+</g>
+</svg>

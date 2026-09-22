@@ -1,12 +1,12 @@
 <script lang="ts">
     /**
      * A group's picture, name and description — the card shared by "Edit
-     * group" and the last step of "Create OneBank". The picture is read
-     * locally and downscaled (`readPicture`); there is no upload bucket.
+     * group" and the last step of "Create OneBank". A picked picture is
+     * compressed and uploaded (`uploadPicture`); `logo` becomes its public URL.
      */
     import Icon from '@iconify/svelte';
     import {initials, t} from '../utils/helper';
-    import {readPicture} from '../utils/picture';
+    import {uploadPicture} from '../utils/upload';
 
     let {
         name = $bindable(''),
@@ -16,32 +16,32 @@
     }: {
         name?: string
         detail?: string
-        /** A data URL or path; empty means the default picture. */
+        /** The uploaded picture's URL; empty means the default picture. */
         logo?: string
         maxName?: number
     } = $props();
 
-    let reading = $state(false);
+    let uploading = $state(false);
     let error = $state('');
     let fileInput = $state<HTMLInputElement | null>(null);
 
     async function pick(event: Event) {
         const file = (event.target as HTMLInputElement).files?.item(0);
         if (!file) return;
-        reading = true;
+        uploading = true;
         error = '';
-        const result = await readPicture(file);
-        reading = false;
+        const result = await uploadPicture(file);
+        uploading = false;
         // Clearing lets the same file be picked again after a failure.
         if (fileInput) fileInput.value = '';
         if (result.url) logo = result.url;
-        else error = result.error || t('Could not use that picture', 'ໃຊ້ຮູບນັ້ນບໍ່ໄດ້');
+        else error = result.error || t('Could not upload that picture', 'ອັບໂຫຼດຮູບບໍ່ໄດ້');
     }
 </script>
 
 <div class="ob-card flex flex-col gap-8 p-7 tablet:flex-row tablet:items-start">
     <div class="flex shrink-0 flex-col items-center gap-3 text-center">
-        <button type="button" class="relative h-41.5 w-41.5 rounded-full" disabled={reading}
+        <button type="button" class="relative h-41.5 w-41.5 rounded-full" disabled={uploading}
                 aria-label={t('Change group picture', 'ປ່ຽນຮູບກຸ່ມ')} onclick={() => fileInput?.click()}>
             {#if logo}
                 <img src={logo} alt="" class="h-full w-full rounded-full object-cover"/>
@@ -51,7 +51,7 @@
                 </span>
             {/if}
             <span class="absolute -right-1 bottom-2">
-                <Icon icon={reading ? 'mdi:progress-upload' : 'mdi:camera'} class="h-8 w-8 text-onebank-ink"/>
+                <Icon icon={uploading ? 'mdi:progress-upload' : 'mdi:camera'} class="h-8 w-8 text-onebank-ink"/>
             </span>
         </button>
         <input type="file" accept="image/*" class="hidden" bind:this={fileInput} onchange={pick}/>

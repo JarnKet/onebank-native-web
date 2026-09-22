@@ -2,7 +2,7 @@
 
 OneBank is BCEL's shared-account banking: a **group** holds accounts that several people can see or use. Each person gets a **role** that decides what they may do and who must approve it. OneBank Web is the desktop front end for it.
 
-This build is a **standalone front end on mock data**. It does not talk to the BCEL One core. Every screen works end to end against an in-browser mock backend (`src/lib/api/mock`), which makes it usable as a clickable prototype, a design reference and the base for connecting a real backend.
+It talks to the BCEL One core. Every Figma screen is **native**. Where a screen needs a command the core contract does not have yet (approvals, roles, statement, transfers, bills, top-up, salary, e-cheque), the command is sent to the core first; if the core refuses it or does not answer, the app answers it from data kept in the browser and says so on screen. The iBanking tiles have no Figma frames either, but are native too, built from the design's patterns. Other services with no Figma screen (leasing, insurance, taxes…) open as legacy overlays from their menu tiles.
 
 ## Who it is for
 
@@ -30,47 +30,36 @@ Lao is the primary language; English, Chinese and Vietnamese are also available.
   - **approval levels**: each level needs either all of its approvers or at least N of them.
 - **Pending authorization**: a transaction made under a role with approval levels waits until enough approvers agree. One rejection ends it, and the maker sees the reason.
 
-## What you can do (every screen)
+## Screens
 
-| Area | Route | What happens |
+| Area | Route | Today |
 |---|---|---|
-| Login | — | QR login (a simulated scan) or username + password; any credentials work in demo mode |
-| Home | `/` | Spending chart, spending share, balances, shortcuts, services, week calendar with that day's transactions |
-| Messages | `/messages`, `/messages/:id` | Inbox of transaction notifications; a receipt-style detail with Print / Share |
-| Pending authorization | `/authorization`, `/authorization/history` | Approve or reject (with a reason) what waits on you; edit, cancel or file away what you made; history of both |
-| Manage permissions | `/role` | Create, edit and delete roles: type, accounts, functions, limits, approval levels, members |
-| Accounts | `/account` | Group accounts; add from personal, open main or shadow, lock, alias, remove |
-| Manage members | `/member` | Search and filter members, change a member's role, see their accounts, remove; add a member (find by code → view or full access → accounts / role) |
-| Edit group | `/group` | Picture, name and description |
-| Create OneBank | `/register` | Intro → terms → choose accounts → group details |
-| Join / leave a group | `/group/join`, `/group/leave` | Show a join code for an owner; leave a group, with a warning |
-| Statement | `/statement` | Available balance, date range, category filters, day-grouped table, CSV export |
-| Transfer | `/transfer` | One or several recipients, recent / favourite recipients, quick amounts, drafts, scheduling, confirmation |
-| International transfer | `/transfer/interbank` | IBAN, SWIFT, address, who pays the fee |
-| Transfer to ID card | `/transfer/idcard` | Cash pickup at a BCEL branch or BCOME agent |
-| Salary & file transfer | `/salary` | Upload a CSV, preview (bad rows flagged), confirm with an OTP |
-| E-Cheque | `/echeque` | Cheque books, write → preview → issue with a QR, cheques received, issued and received history, buy a book |
-| Electricity / Water | `/bill/electricity`, `/bill/water` | Look up a bill by customer number and pay all or part of it |
-| Top-up phone | `/topup` | Number (carrier detected from the prefix), recent numbers, quick amounts |
-| Other services | `/service/:key` | Services the web design doesn't cover (leasing, insurance, taxes…) open an explanatory page, never a blank one |
+| Login | — | QR login (scan with the BCEL One app) or username + password, against the core |
+| Home | `/` | **Native**: spending chart, spending share, balances, shortcuts, services, week calendar |
+| Messages | `/messages`, `/messages/:id` | **Native** on `viewtransactions`: the group's transactions and a receipt-style detail with Print / Share |
+| Accounts | `/account` | **Native**: add from personal, open main or shadow, lock, alias, remove |
+| Manage members | `/member` | **Native**: search and filter, see roles and accounts, remove; add a member by code, then set their permissions on the legacy role page |
+| Edit group | `/group` | **Native**: picture (uploaded), name and description |
+| Create OneBank | `/register` | **Native**: intro → terms → accounts → group details |
+| Join / leave a group | `/group/join`, `/group/leave` | **Native**: show a join code and wait for the owner (socket); leave with a warning |
+| Pending authorization | `/authorization`, `/authorization/history` | **Native**; approve / reject / cancel fall back to local data |
+| Manage permissions | `/role` | **Native** on `getpermissions`; saving a role falls back to local data |
+| Statement | `/statement` | **Native**; falls back to the real transaction list, filtered by account |
+| Transfer, international, ID card | `/transfer`, `/transfer/interbank`, `/transfer/idcard` | **Native**; submitting falls back to local data |
+| Salary, E-Cheque | `/salary`, `/echeque` | **Native**; falls back to local data |
+| Electricity, Water, Top-up | `/bill/electricity`, `/bill/water`, `/topup` | **Native**; paying falls back to local data |
+| Account detail | `/accounts/detail` | **Native** on the group's `loadhome`: accounts by kind, totals per currency; a row opens its statement |
+| Slip report | `/slips` | **Native** on `viewtransactions`: the group's transfers by account and date; a row opens its printable receipt |
+| Destination accounts | `/beneficiaries` | **Native**: the saved recipients the transfer form offers; add, remove, favourite fall back to local data |
+| Exchange / interest rates | `/rates/exchange`, `/rates/interest` | **Native**; the rates fall back to reference data dated when it was published |
+| Term deposits, loans | `/term-deposits`, `/loans` | **Native**: list, terms, movements, and the loan's instalment schedule; fall back to reference data |
+| Notification settings | `/settings/notifications` | **Native**: one switch per alert kind, saved per group; falls back to local data |
+| Every other service | menu tile | Legacy overlay |
 
-## Demo behaviour worth knowing
-
-- **Seed data** is generated relative to today, so the calendar, statement and pending queue always look current. It is also seeded deterministically, so a reload shows the same data.
-- **State persists per browser tab** (sessionStorage). Logging out resets the demo.
-- **Approval.** In *ບໍລິສັດ ນາມສົມມຸດ ຈຳກັດ* your role needs one other approver, so your transfers wait. The groups *ຮ້ານ ພູວົງ* and *ຄອບຄົວ* have no approvers, so transfers there execute at once. Because a demo has no second person:
-  - a pending transfer you made offers **"approve as the next approver"**;
-  - the Join page offers **"play the owner and let me in"**.
-- **Demo values:**
-  - Member codes: `2045`, `3312`, `7788`.
-  - Group join code: `JG-5050`, or the code the Join page shows.
-  - OTP: any 6 digits.
+**Offline data.** When one of those commands is answered locally, a navy notice at the top of the screen says the bank did not answer and nothing on that screen was sent to the bank. Local data lasts for the browser tab and is cleared on logout. Once the core implements a command, the screen uses the core's answer with no change.
 
 ## Out of scope for this build
 
-These are deliberate, not missing work:
-
-- **No real backend.** Replace `mockTransport` in `src/lib/api/client.ts` to connect one.
-- **The QR codes are decorative.** They encode nothing.
-- **Salary upload reads CSV only.** Save an Excel sheet as CSV first.
+- **Real money movement for unmapped commands.** Approve / reject, saving a role, statement, transfers, bills, top-up, salary, e-cheque and the iBank screens (rates, deposits, loans, alerts, destination accounts) have no known command in the core contract here. Until they are mapped, what those screens do stays in the browser.
+- **Unread state.** The contract has no read/unread flag, so Messages shows no unread badge.
 - **No mobile app parity.** The mobile app is the separate `onebank-ui` repo.

@@ -6,7 +6,8 @@
     import Icon from '@iconify/svelte';
     import SourceAccount from './money/SourceAccount.svelte';
     import ConfirmTransfer from './money/ConfirmTransfer.svelte';
-    import {payBill, viewTransactions} from '../lib/api/commands';
+    import {viewTransactions} from '../lib/api/commands';
+    import {payBill} from '../lib/api/unmapped';
     import {formatMoney, money, t} from '../lib/utils/helper';
     import {navigateToPath} from '../lib/utils/navigation';
     import {currentGroup, loadHomeResult} from '../stores/onebankGroups';

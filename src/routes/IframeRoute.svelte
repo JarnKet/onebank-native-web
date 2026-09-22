@@ -1,40 +1,29 @@
 <script lang="ts">
     /**
-     * A routed page whose content is still an iframe.
+     * A Figma route whose screen is not native yet: its legacy page, framed.
      *
-     * Phase 1 gives every corporate page a real URL without changing what
-     * renders. When a page is migrated, its route swaps this component for the
-     * native one and nothing else moves.
+     * The route owns the URL, the sidebar highlight and the deep link; only the
+     * content is still a b1hybrid / onebank-ui page. When the route flips to
+     * `native: true` this component simply stops being mounted for it.
      *
      * Route params ride in the hash querystring, so `#/role?page=addpermission`
-     * survives a refresh and can be linked to.
-     *
-     * The component positions itself rather than relying on a wrapper in
-     * FrameContainer: a wrapper stays in the DOM on routes that render nothing
-     * (home) and covers the main frame, making it unclickable.
+     * survives a refresh and can be linked to. Read through `routeLocation`,
+     * never svelte-spa-router's internals (CLAUDE.md).
      */
-    import {router} from 'svelte-spa-router';
     import {buildPageUrl} from '../lib/utils/helper';
     import {currentGroup} from '../stores/onebankGroups';
+    import {routeLocation} from '../stores/route';
 
     let {page}: {page: string} = $props();
 
-    const src = $derived(buildPageUrl(page, router.querystring ?? '', $currentGroup));
+    const src = $derived(buildPageUrl(page, $routeLocation.query, $currentGroup));
 </script>
 
-<div class="route-frame absolute left-0 top-0 z-0 w-full">
+<div class="route-frame ob-card h-full min-h-[calc(100vh-220px)] overflow-hidden">
     <iframe
             title={page}
             {src}
-            class="h-full w-full"
+            class="block h-full min-h-[inherit] w-full border-0 bg-white"
             allow="camera; clipboard-read; clipboard-write"
     ></iframe>
 </div>
-
-<style>
-    /* Fills the container. The 48px offset this used to carry was clearance for
-       MAIN.html's tab bar, which no longer exists. */
-    .route-frame {
-        height: 100%;
-    }
-</style>

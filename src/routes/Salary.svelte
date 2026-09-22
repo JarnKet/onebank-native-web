@@ -7,7 +7,7 @@
     import Icon from '@iconify/svelte';
     import SourceAccount from './money/SourceAccount.svelte';
     import {parseSalaryCsv, SALARY_TEMPLATE, type SalaryRow} from './money/salary';
-    import {submitTransfer} from '../lib/api/commands';
+    import {submitTransfer} from '../lib/api/unmapped';
     import {maskAccount, money, t} from '../lib/utils/helper';
     import {goHome, navigateToPath} from '../lib/utils/navigation';
     import {loadHomeResult} from '../stores/onebankGroups';
@@ -153,7 +153,7 @@
         </div>
 
         {#if problems.length || overBalance}
-            <div class="flex gap-3 rounded-ob-md border border-amber-300 bg-amber-50 p-4 text-sm text-amber-800">
+            <div class="flex gap-3 rounded-ob-md border border-onebank-red/30 bg-onebank-pink p-4 text-sm text-onebank-red">
                 <Icon icon="mdi:alert" class="h-5 w-5 shrink-0"/>
                 <p>
                     {#if problems.length}{t(`${problems.length} row(s) cannot be paid. Fix the file and upload it again.`, `${problems.length} ແຖວບໍ່ສາມາດໂອນໄດ້. ກະລຸນາແກ້ໄຂໄຟລ໌ແລ້ວອັບໂຫຼດໃໝ່.`)}{/if}
@@ -162,7 +162,7 @@
             </div>
         {:else}
             <label class="block">
-                <span class="ob-label">{t('Enter the OTP sent to your phone', 'ປ້ອນ OTP ທີ່ສົ່ງໄປຫາໂທລະສັບ')} <span class="text-xs text-onebank-subtle">({t('demo: any 6 digits', 'ທົດລອງ: 6 ຕົວເລກໃດກໍໄດ້')})</span></span>
+                <span class="ob-label">{t('Enter the OTP sent to your phone', 'ປ້ອນ OTP ທີ່ສົ່ງໄປຫາໂທລະສັບ')}</span>
                 <input class="ob-input text-center tracking-[0.5em]" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="••••••" bind:value={otp}/>
             </label>
         {/if}

@@ -8,11 +8,12 @@
     import Icon from '@iconify/svelte';
     import AccountPicker from '../lib/components/AccountPicker.svelte';
     import Modal from '../lib/components/Modal.svelte';
-    import {getStatement} from '../lib/api/commands';
+    import {getStatement} from '../lib/api/unmapped';
     import type {TransactionInfo} from '../lib/api/types';
     import {formatMoney, isoDay, money, splitTime, t} from '../lib/utils/helper';
     import {ALL_CATEGORIES, CATEGORY_GROUPS, counterpart} from '../lib/transactions';
     import {currentGroup, loadHomeResult} from '../stores/onebankGroups';
+    import {routeLocation} from '../stores/route';
 
     const today = new Date();
     const monthAgo = new Date(today);
@@ -31,9 +32,13 @@
     let filterSearch = $state('');
 
     const accounts = $derived($loadHomeResult?.accounts ?? []);
+    /** `?account=<accountid>` opens that account's statement (Account detail links here). */
+    const linked = $derived(new URLSearchParams($routeLocation.query).get('account') ?? '');
 
     $effect(() => {
-        if (!accounts.some((account) => account.accountid === accountId)) accountId = accounts[0]?.accountid ?? '';
+        if (!accounts.some((account) => account.accountid === accountId)) {
+            accountId = accounts.find((account) => account.accountid === linked)?.accountid ?? accounts[0]?.accountid ?? '';
+        }
     });
 
     $effect(() => {

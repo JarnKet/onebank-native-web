@@ -1,17 +1,32 @@
 <script lang="ts">
     import FormLogin from './components/FormLogin.svelte';
     import {loggedIn} from "./stores/session";
+    import {unauthenticatedPopups} from "./stores/popup";
+    import UnauthenticatedFrameContainer from "./components/UnauthenticatedFrameContainer.svelte";
     import Login from "./components/Login.svelte";
     import QRCodeLogin from "./components/QRCodeLogin.svelte";
     import MainContent from "./components/MainContent.svelte";
+    import SecondaryLoadingSpinner from "./components/SecondaryLoadingSpinner.svelte";
     import {restoreSession} from "./lib/session";
+    import {untrack} from "svelte";
 
     let isQrLogin = $state(true);
 
-    // A login survives a reload. Adopting it is synchronous — there is no core
-    // to re-validate against — so it runs before the first render and the
-    // login form never flashes.
-    restoreSession();
+    // A login survives a reload now, so boot cannot decide between the login
+    // screen and the app until it knows whether the stored session is still
+    // one the core honours. Showing the login form first and swapping it out
+    // would flash a form at every reload.
+    let restoring = $state(true);
+
+    // A one-shot boot task, not a reaction: `untrack` guarantees that whatever
+    // `restoreSession` touches on its way to its first await cannot become a
+    // dependency and re-run the login check. `restoring` is only ever assigned
+    // from the settled promise, which is outside the effect's tracked run.
+    $effect(() => {
+        untrack(() => restoreSession()).finally(() => {
+            restoring = false;
+        });
+    });
 </script>
 
 <!--
@@ -21,7 +36,16 @@
     nothing at all on screen and nothing in the console worth reading.
 -->
 <svelte:boundary onerror={(error) => console.error('[onebank] the app failed to render', error)}>
-    {#if $loggedIn}
+    {#if restoring}
+        <div class="flex h-screen w-screen items-center justify-center">
+            <!-- The secondary (grey) spinner, not the primary one: that is
+                 white, meant for the red button, and invisible against this
+                 page's near-white background — a blank screen by another name. -->
+            <SecondaryLoadingSpinner/>
+        </div>
+    {:else if $unauthenticatedPopups && $unauthenticatedPopups.length > 0}
+        <UnauthenticatedFrameContainer/>
+    {:else if $loggedIn}
         <MainContent/>
     {:else}
         <Login onLoginTypeChange={() => (isQrLogin = !isQrLogin)}>

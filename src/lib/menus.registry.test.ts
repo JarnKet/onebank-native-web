@@ -9,14 +9,14 @@
  */
 
 import { describe, expect, it } from 'vitest'
-import { menus } from './menus'
+import { ALWAYS_OFFERED, menus, offeredMenus } from './menus'
 
 /**
- * The keys onebank-ui's own Functions widget appends unconditionally.
- * Mirrored in `src/routes/home/Functions.svelte`; if that list grows, this one
- * has to grow with it, and every key in it needs a registry entry.
+ * The keys onebank-ui's own Functions widget appends unconditionally, pinned
+ * here so the shared `ALWAYS_OFFERED` in `menus.ts` cannot quietly lose one —
+ * which is exactly how iBank vanished from the Home grid in the Figma rebuild.
  */
-const ALWAYS_OFFERED = [
+const ONEBANK_UI_ALWAYS_OFFERED = [
   'ONEBANKSTATEMENT',
   'ONEBANKTRANSFER',
   'ONEBANKUTILITIES',
@@ -50,6 +50,23 @@ const IBANK_MENUS = [
 
 /** OneBank-branded utility pages, also absent from the first harvest. */
 const ONEBANK_UTILITIES = ['ONEBANKUTILITIES', 'ONEBANKPHONE', 'ONEBANKWATER', 'ONEBANKELECTRICITY']
+
+describe('the menus offered whatever the core sends', () => {
+  it('match onebank-ui', () => {
+    expect(ALWAYS_OFFERED).toEqual(ONEBANK_UI_ALWAYS_OFFERED)
+  })
+
+  it('reach the grid even when allmenus omits them', () => {
+    const offered = offeredMenus(['TRANSFER'])
+    expect(offered).toContain('TRANSFER')
+    for (const key of ALWAYS_OFFERED) expect(offered, key).toContain(key)
+  })
+
+  it('appear once when the core sends some of them too', () => {
+    const offered = offeredMenus(['IBANKSALARY', 'TRANSFER'])
+    expect(offered.filter((key) => key === 'IBANKSALARY')).toHaveLength(1)
+  })
+})
 
 describe('the menu registry', () => {
   it('knows every menu the Functions grid offers unprompted', () => {

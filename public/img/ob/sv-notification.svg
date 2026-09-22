@@ -1,0 +1,11 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="38" height="40" viewBox="0 0 38 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Layer_1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<g stroke="#133D6B">
+<path d="M19 6C13 6 10 10.5 10 16V24L6 29H32L28 24V16C28 10.5 25 6 19 6Z"/>
+<path d="M19 3V6M15.5 33A3.5 3.5 0 0 0 22.5 33"/>
+</g>
+<g stroke="#DD2319" stroke-width="2.5">
+<circle cx="30" cy="8" r="4.5" fill="#DD2319"/>
+</g>
+</g>
+</svg>

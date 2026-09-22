@@ -9,7 +9,7 @@
     import Modal from '../lib/components/Modal.svelte';
     import FauxQr from '../lib/components/FauxQr.svelte';
     import SelectableAccount from '../lib/components/SelectableAccount.svelte';
-    import {buyChequeBook, cancelCheque, createCheque, getChequeBooks, getCheques, lookupAccount} from '../lib/api/commands';
+    import {buyChequeBook, cancelCheque, createCheque, getChequeBooks, getCheques, lookupAccount} from '../lib/api/unmapped';
     import type {Cheque, ChequeBook} from '../lib/api/types';
     import {isoDay, maskAccount, money, splitTime, t} from '../lib/utils/helper';
     import {currentGroup, loadHomeResult} from '../stores/onebankGroups';
@@ -219,7 +219,7 @@
             </div>
         {:else if (step === 'PREVIEW' || step === 'DONE') && book}
             {@const shown = issued && step === 'DONE' ? issued : null}
-            <div class="relative mx-auto max-w-2xl overflow-hidden rounded-ob-md border border-onebank-row bg-[linear-gradient(135deg,#fff_0%,#fff6f6_60%,#f4fbff_100%)] p-6 shadow-ob-card">
+            <div class="relative mx-auto max-w-2xl overflow-hidden rounded-ob-md border border-onebank-row bg-white p-6 shadow-ob-card">
                 <div class="absolute inset-y-0 left-6 border-l-2 border-dashed border-onebank-light-grey-4"></div>
                 <div class="pl-6">
                     <div class="flex items-start justify-between gap-4">

@@ -3,11 +3,10 @@ import RSAKey from "./rsakey";
 import jsbn from 'jsbn'
 import axios from 'axios'
 import { env } from '../env'
+import { serviceUrl } from '../overrides'
 import { sessionKey as sessionKeyStore } from '../../stores/session'
 
 const BigInteger = jsbn.BigInteger
-
-const SERVICE_URL = env.serviceUrl
 
 
 export default class Connector {
@@ -29,7 +28,9 @@ export default class Connector {
      */
     private static async post(body: Record<string, unknown>): Promise<{data: any}> {
         try {
-            return await axios.post(SERVICE_URL, body, {
+            // Resolved per request, so the login form's Core IP takes effect
+            // without a rebuild (dev overrides only; see src/lib/overrides.ts).
+            return await axios.post(serviceUrl(), body, {
                 timeout: env.requestTimeoutMs,
                 headers: {'Content-Type': 'multipart/form-data'},
             });

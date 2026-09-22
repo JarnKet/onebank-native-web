@@ -1,4 +1,4 @@
-> **Superseded (2026-09-21).** This plan describes porting the iframe-based app page by page. The app has since been rebuilt as a standalone front end on mock data, matching the Figma design, with no iframes and no core connection. Kept as history; see `PRODUCT.md`, `DESIGN.md` and `CLAUDE.md` for the current state.
+> **Status (2026-09-21).** The Figma redesign is in. Native: Home, Messages, Accounts, Manage members, Edit group, Create OneBank, Join / Leave group. Framed until their core commands are mapped: Pending authorization, Manage permissions, Statement, Transfer (+ international, ID card), Salary, E-Cheque, Electricity, Water, Top-up — their native screens are built but not mounted (see `CLAUDE.md`, "Native vs framed routes").
 
 # OneBank Web: fork from onebank-ui and build the web app natively here
 

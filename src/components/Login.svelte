@@ -2,6 +2,7 @@
     import type {Snippet} from 'svelte';
     import Icon from '@iconify/svelte';
     import LanguageSelector from './LanguageSelector.svelte';
+    import {showUnauthenticatedPopup} from '../lib/utils/helper';
     import {language} from "../stores/config";
 
     interface Props {
@@ -38,10 +39,11 @@
             <div class="w-1/2 ">
                 <div class="flex flex-col gap-2">
                     <div class="flex justify-between items-center">
-                        <a
+                        <button
+                                type="button"
                                 class="group flex flex-col items-center transition-all hover:scale-105"
                                 aria-label="Customer Support"
-                                href="tel:1555"
+                                onclick={() => showUnauthenticatedPopup('ONECARE.html')}
                         >
                             <div class="flex h-10 w-10 items-center justify-center rounded-full bg-onebank-red/5 transition-colors group-hover:bg-onebank-red/10 disabled:group-hover:bg-onebank-red/5 tablet:h-12 tablet:w-12">
                                 <Icon icon="mdi:headphones-settings"
@@ -56,7 +58,7 @@
                                     <span>{t('Support', 'ພະນັກງານ')}</span>
                                 </div>
                             </div>
-                        </a>
+                        </button>
                         <LanguageSelector currentLang={$language}/>
                     </div>
                     <div class="mx-auto">
@@ -88,7 +90,7 @@
     </div>
     <div class="mt-4 text-center">
         <div>&copy; 2023 ທະນາຄານການຄ້າຕ່າງປະເທດລາວມະຫາຊົນ</div>
-        <div>ໂທ: 1555, (856-21) 213200, 22495, (856-21) 213202, 223012 | <a href="/" class="text-blue-500">ຄຳຖາມ &
-            ຄຳຕອບ</a> | <a href="/" class="text-blue-500">ເງື່ອນໄຂການນຳໃຊ້</a></div>
+        <div>ໂທ: 1555, (856-21) 213200, 22495, (856-21) 213202, 223012 | <a href="/" class="text-onebank-blue underline">ຄຳຖາມ &
+            ຄຳຕອບ</a> | <a href="/" class="text-onebank-blue underline">ເງື່ອນໄຂການນຳໃຊ້</a></div>
     </div>
 </div>

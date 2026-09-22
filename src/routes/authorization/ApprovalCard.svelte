@@ -20,7 +20,6 @@
         onEdit,
         onCancel,
         onArchive,
-        onSimulate,
     }: {
         tx: TransactionInfo
         /** The logged-in user's id, to mark their own decisions "(You)". */
@@ -32,8 +31,6 @@
         onEdit?: () => void
         onCancel?: () => void
         onArchive?: () => void
-        /** Demo: approve as the next approver, since there is no one else. */
-        onSimulate?: () => void
     } = $props();
 
     const when = $derived(splitTime(tx.txtime));
@@ -82,7 +79,7 @@
     </div>
 
     {#if mode === 'maker' && tx.status === 'PENDING'}
-        <p class="mx-auto mt-3 w-fit rounded-full border border-orange-300 px-4 py-1 text-xs text-orange-500">
+        <p class="mx-auto mt-3 w-fit rounded-full border border-onebank-pending/40 px-4 py-1 text-xs text-onebank-pending">
             {t(`Waiting for level ${nextLevel} approval`, `ລໍຖ້າອະນຸມັດຂັ້ນ ${nextLevel}`)} · {approvals.length}/{tx.requiredApprovals ?? 1}
         </p>
     {/if}
@@ -121,14 +118,6 @@
             <button type="button" class="h-8 w-28 rounded-ob-sm bg-onebank-light-grey-2 text-sm disabled:opacity-50" disabled={busy} onclick={onEdit}>{t('Edit', 'ແກ້ໄຂ')}</button>
             <button type="button" class="h-8 w-28 rounded-ob-sm bg-onebank-light-grey-4 text-sm disabled:opacity-50" disabled={busy} onclick={onCancel}>{t('Cancel', 'ຍົກເລີກ')}</button>
         </div>
-        {#if onSimulate}
-            <p class="mt-3 text-center text-xs text-onebank-subtle">
-                {t('Demo:', 'ທົດລອງ:')}
-                <button type="button" class="font-semibold text-onebank-red underline disabled:opacity-50" disabled={busy} onclick={onSimulate}>
-                    {t('approve as the next approver', 'ຈຳລອງຜູ້ອະນຸມັດຄົນຕໍ່ໄປ')}
-                </button>
-            </p>
-        {/if}
     {:else if mode === 'maker' && rejected}
         <div class="mt-4 flex justify-center">
             <button type="button" class="h-8 rounded-ob-sm bg-[#cdeaf8] px-6 text-sm disabled:opacity-50" disabled={busy} onclick={onArchive}>{t('Move to history', 'ເກັບໄວ້ໃນປະຫວັດ')}</button>

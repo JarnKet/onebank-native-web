@@ -7,11 +7,12 @@
     import Icon from '@iconify/svelte';
     import PermissionEditor from '../lib/components/PermissionEditor.svelte';
     import ConfirmDialog from './account/ConfirmDialog.svelte';
-    import {getPermissions, removePermission, savePermission} from '../lib/api/commands';
+    import {getPermissions, removePermission} from '../lib/api/commands';
+    import {savePermission} from '../lib/api/unmapped';
     import type {Permission} from '../lib/api/types';
     import {initials, t} from '../lib/utils/helper';
     import {currentGroup, loadHomeResult} from '../stores/onebankGroups';
-    import {menus} from '../lib/menus';
+    import {menus, offeredMenus} from '../lib/menus';
 
     let permissions = $state<Permission[]>([]);
     let loading = $state(false);
@@ -24,7 +25,8 @@
 
     const accounts = $derived($loadHomeResult?.accounts ?? []);
     const members = $derived($loadHomeResult?.users ?? []);
-    const functions = $derived(($loadHomeResult?.allmenus ?? []).filter((key) => menus[key]));
+    // What a role can grant is what the group can be offered, iBank included.
+    const functions = $derived(offeredMenus($loadHomeResult?.allmenus));
     const isOwner = $derived(['OWNER', 'ADMIN'].includes($loadHomeResult?.me?.role ?? ''));
 
     async function load(group: string) {
@@ -129,7 +131,7 @@
                     {@const holders = members.filter((member) => permission.userids.includes(member.userid))}
                     <article class="ob-card flex flex-col gap-4 p-5">
                         <header class="flex items-start gap-3">
-                            <span class="flex h-12 w-12 items-center justify-center rounded-full {permission.viewonly ? 'bg-sky-100 text-sky-600' : 'bg-violet-100 text-violet-600'}">
+                            <span class="flex h-12 w-12 items-center justify-center rounded-full {permission.viewonly ? 'bg-onebank-blue-soft text-onebank-blue' : 'bg-onebank-pink text-onebank-red'}">
                                 <Icon icon={permission.viewonly ? 'mdi:eye-outline' : 'mdi:security-account'} class="h-6 w-6"/>
                             </span>
                             <div class="min-w-0 flex-1">
@@ -148,15 +150,15 @@
                             {/if}
                         </header>
                         <ul class="flex flex-wrap gap-2 text-xs font-medium">
-                            <li class="rounded-full bg-orange-100 px-3 py-1 text-orange-700">{t(`${permission.accountids.length} accounts`, `${permission.accountids.length} ບັນຊີ`)}</li>
-                            <li class="rounded-full bg-sky-100 px-3 py-1 text-sky-700">{t(`${permission.userids.length} members`, `ສະມາຊິກ ${permission.userids.length} ຄົນ`)}</li>
+                            <li class="rounded-full bg-onebank-blue-soft px-3 py-1 text-onebank-blue">{t(`${permission.accountids.length} accounts`, `${permission.accountids.length} ບັນຊີ`)}</li>
+                            <li class="rounded-full bg-onebank-blue-soft px-3 py-1 text-onebank-blue">{t(`${permission.userids.length} members`, `ສະມາຊິກ ${permission.userids.length} ຄົນ`)}</li>
                             {#if !permission.viewonly}
-                                <li class="rounded-full bg-violet-100 px-3 py-1 text-violet-700">{functionCount(permission)}</li>
+                                <li class="rounded-full bg-onebank-blue-soft px-3 py-1 text-onebank-blue">{functionCount(permission)}</li>
                                 {#if permission.approverlevels?.length}
                                     <li class="rounded-full bg-onebank-pink px-3 py-1 text-onebank-red">{t(`${permission.approverlevels.length} approval levels`, `ອະນຸມັດ ${permission.approverlevels.length} ຂັ້ນ`)}</li>
                                 {/if}
                                 {#if permission.limit?.pertransaction || permission.limit?.daily}
-                                    <li class="rounded-full bg-amber-100 px-3 py-1 text-amber-700">{t('Has spending limits', 'ມີການຈຳກັດວົງເງິນ')}</li>
+                                    <li class="rounded-full bg-onebank-pink px-3 py-1 text-onebank-red">{t('Has spending limits', 'ມີການຈຳກັດວົງເງິນ')}</li>
                                 {/if}
                             {/if}
                         </ul>

@@ -46,7 +46,7 @@
       >
         <div
           class="flex size-9 items-center justify-center rounded-full transition-all {activeTab === tab.id
-            ? 'ob-gradient shadow-md'
+            ? 'bg-onebank-red shadow-md'
             : 'bg-gray-100 group-hover:bg-gray-200'}"
         >
           <Icon

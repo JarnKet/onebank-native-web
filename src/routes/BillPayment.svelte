@@ -7,7 +7,7 @@
     import Icon from '@iconify/svelte';
     import SourceAccount from './money/SourceAccount.svelte';
     import ConfirmTransfer from './money/ConfirmTransfer.svelte';
-    import {getBillers, lookupBill, payBill} from '../lib/api/commands';
+    import {getBillers, lookupBill, payBill} from '../lib/api/unmapped';
     import type {Biller, LookupBillResponse} from '../lib/api/types';
     import {money, t} from '../lib/utils/helper';
     import {navigateToPath} from '../lib/utils/navigation';

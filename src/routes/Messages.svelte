@@ -1,46 +1,53 @@
 <script lang="ts">
     /**
-     * The group's inbox: one row per notification — what happened, to which
-     * account, when, its status, the amount and who it went to. A row opens
+     * The group's messages: its transactions, newest first — what happened, to
+     * which account, when, its status, the amount and who it went to. The data
+     * is `viewtransactions`, what the old TRANSACTION page showed. A row opens
      * the transaction's detail.
      */
     import ListToolbar from '../lib/components/ListToolbar.svelte';
-    import {getMessages} from '../lib/api/commands';
-    import type {Message} from '../lib/api/types';
+    import {viewTransactions} from '../lib/api/commands';
+    import type {TransactionInfo} from '../lib/api/types';
     import {maskAccount, money, splitTime, t} from '../lib/utils/helper';
     import {navigateToPath} from '../lib/utils/navigation';
-    import {serviceLabel, statusLabel, statusTone} from '../lib/transactions';
+    import {counterpart, serviceLabel, statusLabel, statusTone} from '../lib/transactions';
     import {currentGroup} from '../stores/onebankGroups';
 
-    let messages = $state<Message[]>([]);
+    let items = $state<TransactionInfo[]>([]);
     let loading = $state(false);
+    let error = $state('');
     let search = $state('');
     let date = $state('');
-    let unreadOnly = $state(false);
 
     $effect(() => {
         const group = $currentGroup;
         if (!group) return;
         loading = true;
-        getMessages(group)
-            .then((response) => (messages = response.messages ?? []))
+        error = '';
+        viewTransactions(group)
+            .then((response) => {
+                if (response?.result === 0) items = response.items ?? [];
+                else error = response?.message || t('Could not load the messages', 'ໂຫຼດຂໍ້ຄວາມບໍ່ໄດ້');
+            })
+            .catch((e) => (error = (e as Error)?.message || t('Could not load the messages', 'ໂຫຼດຂໍ້ຄວາມບໍ່ໄດ້')))
             .finally(() => (loading = false));
     });
 
     const shown = $derived(
-        messages.filter((message) => {
-            if (unreadOnly && message.read) return false;
-            if (date && !message.time.startsWith(date)) return false;
-            const query = search.trim().toLowerCase();
-            return !query || `${message.accountname} ${message.toaccount} ${message.account} ${message.maker}`.toLowerCase().includes(query);
-        }),
+        [...items]
+            .sort((a, b) => String(b.txtime ?? '').localeCompare(String(a.txtime ?? '')))
+            .filter((item) => {
+                if (date && !String(item.txtime ?? '').startsWith(date)) return false;
+                const query = search.trim().toLowerCase();
+                return !query || `${counterpart(item)} ${item.account ?? ''} ${item.accountname ?? ''} ${item.makername ?? ''}`.toLowerCase().includes(query);
+            }),
     );
 </script>
 
 <div class="space-y-4">
     <h1 class="sr-only">{t('Messages', 'ຂໍ້ຄວາມ')}</h1>
-    <ListToolbar bind:search bind:date filterCount={unreadOnly ? 1 : 0} onFilter={() => (unreadOnly = !unreadOnly)}/>
-    {#if unreadOnly}<p class="text-sm text-onebank-subtle">{t('Showing unread messages only', 'ສະແດງສະເພາະຂໍ້ຄວາມທີ່ຍັງບໍ່ໄດ້ອ່ານ')}</p>{/if}
+    <ListToolbar bind:search bind:date/>
+    {#if error}<div class="rounded-ob-sm bg-red-50 p-3 text-sm text-red-700" role="alert">{error}</div>{/if}
 
     <div class="overflow-x-auto rounded-ob-md bg-white shadow-ob-card">
         <table class="w-full min-w-[760px] text-left text-xs">
@@ -55,26 +62,24 @@
                 </tr>
             </thead>
             <tbody>
-                {#if loading && messages.length === 0}
+                {#if loading && items.length === 0}
                     {#each [0, 1, 2] as i (i)}<tr><td colspan="6" class="px-6 py-2"><div class="h-8 animate-pulse rounded bg-onebank-row"></div></td></tr>{/each}
                 {/if}
-                {#each shown as message (message.messageid)}
-                    {@const when = splitTime(message.time)}
-                    <tr class="cursor-pointer border-t border-onebank-row transition-colors hover:bg-onebank-page {message.read ? '' : 'font-semibold'}"
-                        onclick={() => navigateToPath(`/messages/${message.messageid}`)}>
+                {#each shown as item, index (item.transactionid ?? index)}
+                    {@const when = splitTime(item.txtime)}
+                    {@const amount = Number(item.amount ?? item.detail?.AMOUNT ?? 0)}
+                    <tr class="cursor-pointer border-t border-onebank-row transition-colors hover:bg-onebank-page"
+                        onclick={() => navigateToPath(`/messages/${item.transactionid}`)}>
                         <td class="px-6 py-3">
-                            <span class="flex items-center gap-2">
-                                {#if !message.read}<span class="h-2 w-2 rounded-full bg-onebank-red" aria-label={t('Unread', 'ຍັງບໍ່ໄດ້ອ່ານ')}></span>{/if}
-                                <a href="#/messages/{message.messageid}" class="hover:underline">{serviceLabel(message.service)}</a>
-                            </span>
+                            <a href="#/messages/{item.transactionid}" class="font-semibold hover:underline">{serviceLabel(item.service)}</a>
                         </td>
-                        <td class="px-4 py-3">{maskAccount(message.account)}</td>
+                        <td class="px-4 py-3">{maskAccount(item.account)}</td>
                         <td class="px-4 py-3 leading-tight">{when.date}<br/><span class="text-onebank-subtle">{when.time}</span></td>
-                        <td class="px-4 py-3"><span class="rounded-full px-2.5 py-0.5 text-[11px] {statusTone(message.status)}">{statusLabel(message.status)}</span></td>
-                        <td class="px-4 py-3 text-right font-semibold tabular-nums {message.amount < 0 ? 'text-onebank-red' : 'text-onebank-income'}">{money(message.amount, message.ccy)}</td>
+                        <td class="px-4 py-3"><span class="rounded-full px-2.5 py-0.5 text-[11px] {statusTone(item.status)}">{statusLabel(item.status)}</span></td>
+                        <td class="px-4 py-3 text-right font-semibold tabular-nums {amount < 0 ? 'text-onebank-red' : 'text-onebank-income'}">{money(amount, item.ccy ?? item.detail?.CCY)}</td>
                         <td class="max-w-72 px-6 py-3">
-                            <span class="block truncate font-semibold">{message.accountname}</span>
-                            <span class="block truncate text-[11px] font-normal text-onebank-subtle">{t('To account', 'ໄປບັນຊີ')}: {message.toaccount}</span>
+                            <span class="block truncate font-semibold">{item.detail?.TOACCOUNTNAME ?? item.accountname ?? ''}</span>
+                            <span class="block truncate text-[11px] text-onebank-subtle">{t('To account', 'ໄປບັນຊີ')}: {item.detail?.TOACCOUNTNO ?? item.detail?.TOACCOUNT ?? ''}</span>
                         </td>
                     </tr>
                 {:else}

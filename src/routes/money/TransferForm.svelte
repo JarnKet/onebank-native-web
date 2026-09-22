@@ -17,7 +17,7 @@
     import SourceAccount from './SourceAccount.svelte';
     import DraftStrip from './DraftStrip.svelte';
     import ConfirmTransfer from './ConfirmTransfer.svelte';
-    import {deleteDraft, getDrafts, getRecipients, lookupAccount, saveDraft, submitTransfer, toggleFavourite} from '../../lib/api/commands';
+    import {deleteDraft, getDrafts, getRecipients, lookupAccount, saveDraft, submitTransfer, toggleFavourite} from '../../lib/api/unmapped';
     import type {Recipient, TransferDraft, TransferItem, TransferKind} from '../../lib/api/types';
     import {formatMoney, initials, maskAccount, money, t} from '../../lib/utils/helper';
     import {navigateToPath} from '../../lib/utils/navigation';
@@ -382,7 +382,7 @@
                                 </button>
                                 <button type="button" aria-label={recipient.favourite ? t('Unfavourite', 'ເອົາອອກຈາກທີ່ມັກ') : t('Favourite', 'ເພີ່ມໃສ່ທີ່ມັກ')}
                                         onclick={async () => { await toggleFavourite(recipient.recipientid); await loadSide($currentGroup); }}>
-                                    <Icon icon={recipient.favourite ? 'mdi:star' : 'mdi:star-outline'} class="h-4 w-4 text-amber-400"/>
+                                    <Icon icon={recipient.favourite ? 'mdi:star' : 'mdi:star-outline'} class="h-4 w-4 text-onebank-red"/>
                                 </button>
                             </li>
                         {:else}

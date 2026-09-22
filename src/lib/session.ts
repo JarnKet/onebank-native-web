@@ -21,6 +21,7 @@ import { get } from 'svelte/store'
 import Connector from './utils/connector'
 import { isOk } from './api/client'
 import { loadGroups } from './api/commands'
+import { resetLocalData } from './api/local'
 import { loggedIn, loginData } from '../stores/session'
 import { unauthenticatedPopups } from '../stores/popup'
 import type { LoginData } from '../definition'
@@ -138,6 +139,8 @@ export async function restoreSession(
  */
 export function logout(): void {
   forgetSession()
+  // What was kept locally for commands the core did not answer belongs to this login.
+  resetLocalData()
   Connector.clearSession()
   loggedIn.set(false)
   window.location.reload()

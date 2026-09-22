@@ -29,6 +29,15 @@ export interface LoginData {
 	authToken: string
 }
 
+export interface PopupMetadata{
+	/** Absent when the opener does not want a result back. */
+	callbackid? : string
+	id : string
+	isVisible : boolean
+	src : string
+	isBcelOne : boolean
+}
+
 export interface Account {
 	accountid: string
 	account: string

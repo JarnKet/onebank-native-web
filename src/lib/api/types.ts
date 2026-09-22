@@ -4,7 +4,8 @@
  * The single place the wire format is expressed. The original 22 commands
  * mirror what the BCEL One core returns (keep them aligned with onebank-ui's
  * `libs/definition.ts`); the ones below them were added for screens the core
- * never served natively and are answered by the mock backend in `./mock`.
+ * never served natively; their commands are placeholders in `./unmapped.ts`
+ * until the real ones are mapped.
  */
 
 import type { Account, GroupDetail, LoadHomeResult, Menu, User } from '../../definition'
@@ -275,7 +276,7 @@ export interface GetApprovalDetailResponse extends ApiEnvelope {
   approvers?: Approver[]
 }
 
-// -------------------------------------------------- added for the mock backend
+// ------------------------------- for the unmapped screens (see ./unmapped.ts)
 
 export interface ApproveTransactionResponse extends ApiEnvelope {
   item?: TransactionInfo
@@ -470,4 +471,139 @@ export interface GetMessagesResponse extends ApiEnvelope {
 
 export interface SavePermissionResponse extends ApiEnvelope {
   permission?: Permission
+}
+
+// -------------------------------------------------------------------- iBank
+//
+// The iBanking screens. Their commands keep the service and command names of
+// the onebank-ui pages they replace (IBANK*/components/WebHome.svelte), which
+// never reached a backend: those pages ran on mock data only.
+
+export interface ExchangeRate {
+  ccy: string
+  nameEn: string
+  nameLo: string
+  /** Iconify id of the flag, e.g. `emojione:flag-for-thailand`. */
+  flag: string
+  /** Cash rates; null where the bank does not buy or sell notes. */
+  buy: number | null
+  sell: number | null
+  /** Transfer rates. */
+  buyTransfer: number | null
+  sellTransfer: number | null
+}
+
+export interface LoadExchangeRatesResponse extends ApiEnvelope {
+  rates?: ExchangeRate[]
+  updated?: string
+}
+
+export interface InterestRate {
+  periodEn: string
+  periodLo: string
+  lak: number | null
+  usd: number | null
+  thb: number | null
+}
+
+export interface InterestRateTable {
+  id: string
+  nameEn: string
+  nameLo: string
+  rates: InterestRate[]
+}
+
+export interface LoadInterestRatesResponse extends ApiEnvelope {
+  tables?: InterestRateTable[]
+  updated?: string
+}
+
+export interface TermDeposit {
+  id: string
+  account: string
+  holder: string
+  product: string
+  ccy: string
+  principal: number
+  interest: number
+  maturityAmount: number
+  /** Percent a year. */
+  rate: number
+  start: string
+  end: string
+  /** Months. */
+  term: number
+}
+
+export interface LoadTermDepositsResponse extends ApiEnvelope {
+  deposits?: TermDeposit[]
+}
+
+export interface Loan {
+  id: string
+  account: string
+  borrower: string
+  product: string
+  typeEn: string
+  typeLo: string
+  ccy: string
+  amount: number
+  outstanding: number
+  monthlyPayment: number
+  /** Percent a year. */
+  rate: number
+  start: string
+  end: string
+  /** Months. */
+  term: number
+  branch: string
+}
+
+export interface LoadLoansResponse extends ApiEnvelope {
+  loans?: Loan[]
+}
+
+/** One movement on a term deposit or a loan. */
+export interface ProductTransaction {
+  id: string
+  date: string
+  descriptionEn: string
+  descriptionLo: string
+  debit: number
+  credit: number
+  balance: number
+}
+
+export interface GetProductTransactionsResponse extends ApiEnvelope {
+  items?: ProductTransaction[]
+}
+
+export interface LoanInstalment {
+  date: string
+  opening: number
+  principal: number
+  interest: number
+  closing: number
+  paid: boolean
+}
+
+export interface GetLoanScheduleResponse extends ApiEnvelope {
+  schedule?: LoanInstalment[]
+}
+
+export interface NotificationSetting {
+  id: string
+  titleEn: string
+  titleLo: string
+  descriptionEn: string
+  descriptionLo: string
+  enabled: boolean
+}
+
+export interface LoadNotificationSettingsResponse extends ApiEnvelope {
+  settings?: NotificationSetting[]
+}
+
+export interface AddRecipientResponse extends ApiEnvelope {
+  recipient?: Recipient
 }

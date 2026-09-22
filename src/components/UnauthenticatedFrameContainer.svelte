@@ -50,7 +50,7 @@
     {/each}
 </div>
 
-<style lang="scss">
+<style>
   #framecontainer {
     width: 100%;
     height: 100vh;

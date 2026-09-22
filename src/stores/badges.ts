@@ -1,33 +1,32 @@
 /**
- * The sidebar's badge counts: unread messages and transactions awaiting the
- * user's approval. Read from the backend, never hardcoded — the old sidebar
- * carried a literal `notifications: 2` on two entries whatever the data said.
+ * The sidebar's badge counts, read from the core — never hardcoded (the old
+ * sidebar carried a literal `notifications: 2` whatever the data said).
+ *
+ * - Pending authorization: the items `getpendingapprovals` returns.
+ * - Messages: the core contract has no read/unread state, so there is no
+ *   honest count to show; `unreadCount` stays 0 and the badge stays hidden
+ *   until such a command exists.
  */
 
 import { get, writable } from 'svelte/store'
-import { getMessages, getPendingApprovals } from '../lib/api/commands'
+import { getPendingApprovals } from '../lib/api/commands'
 import { currentGroup } from './onebankGroups'
 import { loginData } from './session'
 
 export const unreadCount = writable(0)
 export const pendingCount = writable(0)
 
-/** The logged-in user's id, from the login payload. */
+/** The logged-in user's id, from the login payload, when the core sends one. */
 export function myUserId(): string {
-  return ((get(loginData) as any)?.USER?.userid as string) ?? 'U1'
+  const data = get(loginData) as any
+  return String(data?.USER?.userid ?? data?.USER?.id ?? '')
 }
 
 export async function refreshBadges(onebankid: string = get(currentGroup)): Promise<void> {
   if (!onebankid) return
   try {
-    const [messages, pending] = await Promise.all([getMessages(onebankid), getPendingApprovals(onebankid)])
-    unreadCount.set((messages.messages ?? []).filter((message) => !message.read).length)
-    const me = myUserId()
-    pendingCount.set(
-      (pending.items ?? []).filter(
-        (tx) => tx.makerid !== me && !(tx.approvals ?? []).some((approval) => approval.userid === me),
-      ).length,
-    )
+    const pending = await getPendingApprovals(onebankid)
+    pendingCount.set(pending?.result === 0 ? (pending.items ?? []).length : 0)
   } catch {
     // A badge is decoration; a failed count must not break the shell.
   }

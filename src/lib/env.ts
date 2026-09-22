@@ -38,6 +38,9 @@ export const env = {
    * clear of a slow LAN round trip while still failing in human time.
    */
   requestTimeoutMs: ms(import.meta.env.VITE_REQUEST_TIMEOUT_MS, 20000),
+  // How long an unmapped command waits for the core before the local store
+  // answers instead (src/lib/api/local). Short: the core usually refuses them.
+  unmappedTimeoutMs: ms(import.meta.env.VITE_UNMAPPED_TIMEOUT_MS, 5000),
 
   /**
    * Where an uploaded picture becomes readable. `getuploadurlr2` returns the

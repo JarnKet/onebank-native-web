@@ -17,7 +17,7 @@
  * Labels are resolved through `t()` at module load, exactly as in onebank-ui:
  * the language comes from the URL and does not change without a reload.
  *
- * The registry must stay a superset of what the core can send: `Functions.svelte`
+ * The registry must stay a superset of what the core can send: `Services.svelte`
  * filters `allmenus` through it, so a key missing from here is silently dropped
  * from the grid rather than rendered as an unknown tile. Eighteen entries — the
  * eleven `IBANK*`, the OneBank utilities and three OneBank Kid actions — were
@@ -211,19 +211,20 @@ export const menus: Record<string, MenuIcon> = {
   '0003': { popupname: 'SECURITIES', filename: 'lao-lsc.jpg', name: t('ລາວ-ຈີນ', 'Lao-China'), params: 'providercode=0003' },
   // REPLACECARD: { filename: 'ob-mn-add-ac.svg', name: t('REPLACECARD', 'REPLACECARD', null, null) },
 
-  // The iBanking family. All eleven share `ib-logo.png`; onebank-ui gives them
-  // no individual icons either.
-  IBANKACCOUNTDETAIL: { filename: 'ib-logo.png', name: t('Account Detail', 'ລາຍລະອຽດບັນຊີ', null, null) },
-  IBANKDESTINATIONACCOUNT: { filename: 'ib-logo.png', name: t('Destination Account', 'ບັນຊີປາຍທາງ', null, null) },
-  IBANKEXCHANGERATES: { filename: 'ib-logo.png', name: t('Exchange Rates', 'ອັດຕາແລກປ່ຽນ', null, null) },
-  IBANKINTERESTRATES: { filename: 'ib-logo.png', name: t('Interest Rates', 'ອັດຕາດອກເບ້ຍ', null, null) },
-  IBANKINTERNATIONALTRANSFER: { filename: 'ib-logo.png', name: t('International Transfer', 'ໂອນເງິນຕ່າງປະເທດ', null, null) },
-  IBANKLOANACCOUNT: { filename: 'ib-logo.png', name: t('Loan Account', 'ບັນຊີເງິນກູ້', null, null) },
-  IBANKNOTIFICATIONSETTING: { filename: 'ib-logo.png', name: t('Notification Setting', 'ຈັດການການແຈ້ງເຕືອນ', null, null) },
+  // The iBanking family. onebank-ui gives all eleven the same `ib-logo.png`;
+  // here each has its own icon in the design's navy-and-red style, since every
+  // one of them opens a native screen (src/lib/routes.ts).
+  IBANKACCOUNTDETAIL: { filename: 'ob/sv-account-detail.svg', name: t('Account Detail', 'ລາຍລະອຽດບັນຊີ', null, null) },
+  IBANKDESTINATIONACCOUNT: { filename: 'ob/sv-beneficiary.svg', name: t('Destination Account', 'ບັນຊີປາຍທາງ', null, null) },
+  IBANKEXCHANGERATES: { filename: 'ob/sv-exchange.svg', name: t('Exchange Rates', 'ອັດຕາແລກປ່ຽນ', null, null) },
+  IBANKINTERESTRATES: { filename: 'ob/sv-interest.svg', name: t('Interest Rates', 'ອັດຕາດອກເບ້ຍ', null, null) },
+  IBANKINTERNATIONALTRANSFER: { filename: 'ob/sv-international.svg', name: t('International Transfer', 'ໂອນເງິນຕ່າງປະເທດ', null, null) },
+  IBANKLOANACCOUNT: { filename: 'ob/sv-loan.svg', name: t('Loan Account', 'ບັນຊີເງິນກູ້', null, null) },
+  IBANKNOTIFICATIONSETTING: { filename: 'ob/sv-notification.svg', name: t('Notification Setting', 'ຈັດການການແຈ້ງເຕືອນ', null, null) },
   IBANKSALARY: { filename: 'ob/sc-salary.svg', name: t('Salary', 'ໂອນເງິນເດືອນ', null, null) },
-  IBANKSLIP: { filename: 'ib-logo.png', name: t('Slip Report', 'ລາຍງານໃບຢັ້ງຢືນການໂອນ', null, null) },
-  IBANKTERMDEPOSITACCOUNT: { filename: 'ib-logo.png', name: t('Term Deposit Account', 'ບັນຊີຝາກມີກຳນົດ', null, null) },
-  IBANKTRANFERIDCARD: { filename: 'ib-logo.png', name: t('Transfer to ID', 'ໂອນລອຍ', null, null) },
+  IBANKSLIP: { filename: 'ob/sv-slip.svg', name: t('Slip Report', 'ລາຍງານໃບຢັ້ງຢືນການໂອນ', null, null) },
+  IBANKTERMDEPOSITACCOUNT: { filename: 'ob/sv-term-deposit.svg', name: t('Term Deposit Account', 'ບັນຊີຝາກມີກຳນົດ', null, null) },
+  IBANKTRANFERIDCARD: { filename: 'ob/sv-transfer-id.svg', name: t('Transfer to ID', 'ໂອນລອຍ', null, null) },
 }
 
 export function getOnlyMenus(pageNames: string[]): Record<string, MenuIcon> {
@@ -267,4 +268,36 @@ export function getSearchMenu(search: string, onlyPageNames: string[] | undefine
     }
     return searchMenus
   }
+}
+
+/**
+ * Menus offered whatever `allmenus` says, matching onebank-ui's Functions
+ * widget: the core does not enumerate the iBanking family or the OneBank
+ * utilities, but their pages exist and are reachable. `usablemenus` still
+ * decides whether each one is live or greyed out.
+ */
+export const ALWAYS_OFFERED = [
+  'ONEBANKSTATEMENT',
+  'ONEBANKTRANSFER',
+  'ONEBANKUTILITIES',
+  'IBANKSALARY',
+  'IBANKACCOUNTDETAIL',
+  'IBANKNOTIFICATIONSETTING',
+  'IBANKEXCHANGERATES',
+  'IBANKINTERESTRATES',
+  'IBANKSLIP',
+  'IBANKDESTINATIONACCOUNT',
+  'IBANKTERMDEPOSITACCOUNT',
+  'IBANKLOANACCOUNT',
+  'IBANKINTERNATIONALTRANSFER',
+  'IBANKTRANFERIDCARD',
+]
+
+/**
+ * Every menu the group can be offered: the core's `allmenus` plus
+ * `ALWAYS_OFFERED`, de-duplicated (the core does send some of these for some
+ * groups), keeping only keys the registry can render.
+ */
+export function offeredMenus(allmenus: string[] | undefined): string[] {
+  return [...new Set([...(allmenus ?? []), ...ALWAYS_OFFERED])].filter((key) => menus[key])
 }

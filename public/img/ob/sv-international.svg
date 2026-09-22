@@ -1,0 +1,12 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="42" height="40" viewBox="0 0 42 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Layer_1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<g stroke="#133D6B">
+<circle cx="17" cy="23" r="14"/>
+<ellipse cx="17" cy="23" rx="6" ry="14"/>
+<path d="M3 23H31M5 16H29M5 30H29"/>
+</g>
+<g stroke="#DD2319" stroke-width="2.5">
+<path d="M27 15L39 3M31 3H39V11"/>
+</g>
+</g>
+</svg>

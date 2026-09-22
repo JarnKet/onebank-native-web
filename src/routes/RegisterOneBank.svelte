@@ -7,7 +7,7 @@
     import Icon from '@iconify/svelte';
     import SelectableAccount from '../lib/components/SelectableAccount.svelte';
     import GroupProfileFields from '../lib/components/GroupProfileFields.svelte';
-    import {createGroup} from '../lib/api/commands';
+    import {changeGroupDetail, createGroup} from '../lib/api/commands';
     import {t} from '../lib/utils/helper';
     import {goHome} from '../lib/utils/navigation';
     import {refreshGroups, selectGroup} from '../stores/groups';
@@ -63,15 +63,26 @@
             return;
         }
         saving = true;
-        const response = await createGroup(selected, {name: name.trim(), detail, logoname: logo});
-        saving = false;
-        if (response.result !== 0) {
-            error = response.message || t('Could not create the group', 'ສ້າງກຸ່ມບໍ່ໄດ້');
-            return;
+        try {
+            // The core creates a group from accounts alone; its name, description
+            // and logo are a second call on the new id.
+            const response = await createGroup(selected);
+            if (response?.result !== 0 || !response.onebankid) {
+                error = response?.message || t('Could not create the group', 'ສ້າງກຸ່ມບໍ່ໄດ້');
+                return;
+            }
+            const saved = await changeGroupDetail({name: name.trim(), detail, color: '', logoname: logo}, response.onebankid);
+            if (saved?.result !== 0) {
+                error = saved?.message || t('The group was created, but its details could not be saved', 'ສ້າງກຸ່ມແລ້ວ ແຕ່ບັນທຶກຂໍ້ມູນກຸ່ມບໍ່ໄດ້');
+            }
+            await refreshGroups(response.onebankid);
+            selectGroup(response.onebankid);
+            goHome();
+        } catch (e) {
+            error = (e as Error)?.message || t('Could not create the group', 'ສ້າງກຸ່ມບໍ່ໄດ້');
+        } finally {
+            saving = false;
         }
-        await refreshGroups(response.onebankid);
-        selectGroup(response.onebankid);
-        goHome();
     }
 
     function toggle(accountid: string) {

@@ -4,12 +4,13 @@
      * search and a type filter on top, a two-column grid of member cards, and
      * the red "add member" button under it.
      *
-     * Each card's first chip is the member's role (open it to move them to
-     * another), the second the accounts that role reaches.
+     * Each card's first chip is the member's role, the second the accounts that
+     * role reaches. Roles are read-only here: saving one is not in the core
+     * contract yet, so changing it happens on "Manage permissions" (ROLE.html).
      */
     import Icon from '@iconify/svelte';
     import ConfirmDialog from './account/ConfirmDialog.svelte';
-    import {getPermissions, removeMember, savePermission} from '../lib/api/commands';
+    import {getPermissions, removeMember} from '../lib/api/commands';
     import type {Permission} from '../lib/api/types';
     import type {User} from '../definition';
     import {initials, maskAccount, t} from '../lib/utils/helper';
@@ -17,6 +18,7 @@
     import {currentGroup, loadHomeResult} from '../stores/onebankGroups';
     import {reloadHome} from '../stores/home';
     import {openAddMemberDialog, showAddMemberDialog} from '../stores/ui';
+    import {navigateToMenu} from '../lib/utils/navigation';
 
     let permissions = $state<Permission[]>([]);
     let search = $state('');
@@ -56,26 +58,6 @@
             return filter === 'VIEW' ? role?.viewonly === true : role !== undefined && !role.viewonly;
         }),
     );
-
-    async function assign(member: User, target: Permission) {
-        openMenu = null;
-        busy = true;
-        error = '';
-        // A member holds one role at a time here: leaving the others is part of moving.
-        for (const permission of permissions) {
-            const has = permission.userids.includes(member.userid);
-            const wants = permission.permissionid === target.permissionid;
-            if (has === wants) continue;
-            const next = {...$state.snapshot(permission), userids: wants
-                ? [...permission.userids, member.userid]
-                : permission.userids.filter((id) => id !== member.userid)} as Permission;
-            const response = await savePermission(next);
-            if (response.result !== 0) error = response.message || t('Could not change the role', 'ປ່ຽນສິດທິບໍ່ໄດ້');
-        }
-        busy = false;
-        notice = t(`${member.name} is now "${target.name}"`, `${member.name} ໄດ້ສິດ "${target.name}" ແລ້ວ`);
-        await load($currentGroup);
-    }
 
     async function confirmRemove() {
         if (!removing) return;
@@ -147,32 +129,13 @@
                         {#if member.role === 'ADMIN'}<span class="ml-1 rounded-full bg-onebank-blue px-2 py-0.5 align-middle text-[10px] font-semibold text-white">{t('Admin', 'ຜູ້ດູແລ')}</span>{/if}
                     </h2>
                     <div class="mt-1.5 flex flex-wrap gap-3">
-                        <div class="relative" {@attach clickOutside(() => { if (openMenu === `role-${member.userid}`) openMenu = null; })}>
-                            <button type="button" disabled={!isOwner || owner || busy}
-                                    class="flex h-7 items-center gap-2 rounded-full px-5 text-sm transition-opacity disabled:cursor-default
-                                           {role?.viewonly === false ? 'bg-[#c9a7f5] text-black' : 'bg-[#a9e3fb] text-black'}"
-                                    aria-haspopup="menu" aria-expanded={openMenu === `role-${member.userid}`}
-                                    onclick={() => (openMenu = openMenu === `role-${member.userid}` ? null : `role-${member.userid}`)}>
-                                {owner ? t('Full access', 'ສິດທັງໝົດ') : role ? (role.viewonly ? t('Can view', 'ເບິ່ງໄດ້') : t('Can transact', 'ເຄື່ອນໄຫວໄດ້')) : t('No role', 'ບໍ່ມີສິດ')}
-                                {#if isOwner && !owner}<Icon icon="mdi:menu-down" class="h-4 w-4"/>{/if}
-                            </button>
-                            {#if openMenu === `role-${member.userid}`}
-                                <ul class="absolute left-0 top-9 z-20 w-60 rounded-ob-lg bg-white py-2 shadow-ob-card" role="menu">
-                                    {#each permissions as permission (permission.permissionid)}
-                                        <li>
-                                            <button type="button" role="menuitem" class="flex w-full items-center gap-2 px-4 py-2 text-left text-sm hover:bg-onebank-pink"
-                                                    onclick={() => assign(member, permission)}>
-                                                <Icon icon={permission.viewonly ? 'mdi:eye-outline' : 'mdi:swap-horizontal'} class="h-4 w-4"/>
-                                                <span class="flex-1 truncate">{permission.name}</span>
-                                                {#if role?.permissionid === permission.permissionid}<Icon icon="mdi:check" class="h-4 w-4 text-onebank-red"/>{/if}
-                                            </button>
-                                        </li>
-                                    {:else}
-                                        <li class="px-4 py-2 text-sm text-onebank-subtle">{t('Create a role first', 'ສ້າງສິດທິກ່ອນ')}</li>
-                                    {/each}
-                                </ul>
-                            {/if}
-                        </div>
+                        <button type="button" disabled={!isOwner || owner}
+                                class="flex h-7 items-center gap-2 rounded-full px-5 text-sm text-black disabled:cursor-default
+                                       {role?.viewonly === false ? 'bg-[#c9a7f5]' : 'bg-[#a9e3fb]'}"
+                                title={isOwner && !owner ? t('Change it on Manage permissions', 'ປ່ຽນໄດ້ໃນ ຈັດການສິດທິ') : undefined}
+                                onclick={() => navigateToMenu('ROLE')}>
+                            {owner ? t('Full access', 'ສິດທັງໝົດ') : role ? (role.viewonly ? t('Can view', 'ເບິ່ງໄດ້') : t('Can transact', 'ເຄື່ອນໄຫວໄດ້')) : t('No role', 'ບໍ່ມີສິດ')}
+                        </button>
                         <div class="relative" {@attach clickOutside(() => { if (openMenu === `acct-${member.userid}`) openMenu = null; })}>
                             <button type="button" class="flex h-7 items-center gap-2 rounded-full bg-[#fbb074] px-5 text-sm text-white"
                                     aria-haspopup="true" aria-expanded={openMenu === `acct-${member.userid}`}

@@ -12,7 +12,7 @@
  * out of production.
  */
 
-import { env } from '../env'
+import { onebankPath, payloadPath } from '../overrides'
 
 const LOOPBACK_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]', '0.0.0.0'])
 
@@ -35,7 +35,9 @@ function extraOrigins(): string[] {
 }
 
 export function allowedOrigins(): string[] {
-  const origins = [originOf(env.payloadPath), originOf(env.onebankPath), ...extraOrigins()]
+  // Resolved, not read from `env`: a frame served from the login form's Core IP
+  // or Onebank UI override must be trusted like the configured ones.
+  const origins = [originOf(payloadPath()), originOf(onebankPath()), ...extraOrigins()]
   if (typeof window !== 'undefined') origins.push(window.location.origin)
   return [...new Set(origins.filter((o): o is string => o !== null))]
 }

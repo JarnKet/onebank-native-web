@@ -4,7 +4,7 @@
      * A service the group's permissions exclude is greyed out and inert rather
      * than offered as if it worked.
      */
-    import {menus} from '../../lib/menus';
+    import {menus, offeredMenus} from '../../lib/menus';
     import {isUsable, openMenu} from './openMenu';
     import {t} from '../../lib/utils/helper';
     import {loadHomeResult} from '../../stores/onebankGroups';
@@ -12,8 +12,9 @@
     let search = $state('');
 
     const usablemenus = $derived($loadHomeResult?.usablemenus);
-    // `Set` de-duplicates: a repeated key would render the same tile twice.
-    const all = $derived([...new Set($loadHomeResult?.allmenus ?? [])].filter((key) => menus[key]));
+    // The core's list plus the iBanking family and OneBank utilities it never
+    // enumerates (see ALWAYS_OFFERED) — dropping those is what made iBank vanish.
+    const all = $derived(offeredMenus($loadHomeResult?.allmenus));
     const query = $derived(search.trim().toLowerCase());
     const shown = $derived(
         query === '' ? all : all.filter((key) => key.toLowerCase().includes(query) || menus[key].name.toLowerCase().includes(query)),

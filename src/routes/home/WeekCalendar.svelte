@@ -14,7 +14,7 @@
     import type {TransactionInfo} from '../../lib/api/types';
     import {BUDDHIST_YEAR_OFFSET, FULL_MONTHS} from '../../lib/constant';
     import {initials, isoDay, lang, money, splitTime, t} from '../../lib/utils/helper';
-    import {navigateToPath} from '../../lib/utils/navigation';
+    import {openMenu} from './openMenu';
     import {currentGroup} from '../../stores/onebankGroups';
     import {indexByDay} from './calendar';
 
@@ -83,7 +83,7 @@
             <img src="img/ob/ic-chevron-circle-right.svg" alt="" width="30" height="30" class="rotate-90"/>
         </button>
         <button type="button" class="ml-3 text-onebank-subtle hover:text-black" aria-label={t('Open statement', 'ເປີດການເຄື່ອນໄຫວ')}
-                onclick={() => navigateToPath('/statement')}>
+                onclick={() => openMenu('ONEBANKSTATEMENT')}>
             <Icon icon="mdi:arrow-expand" class="h-5 w-5"/>
         </button>
     </header>
@@ -107,7 +107,7 @@
         {/each}
     </div>
 
-    <button type="button" class="onebank-outline-btn mt-5 text-xl" onclick={() => navigateToPath('/transfer')}>
+    <button type="button" class="onebank-outline-btn mt-5 text-xl" onclick={() => openMenu('TRANSFER')}>
         <Icon icon="mdi:plus-circle" class="h-6 w-6"/>
         {t('New transaction', 'ມອບໝາຍທຸລະກຳ')}
     </button>

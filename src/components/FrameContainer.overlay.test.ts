@@ -122,7 +122,7 @@ describe('with a b1hybrid overlay open', () => {
 
 describe('a routed page', () => {
   it('covers home, and uncovers it on the way back', async () => {
-    await goto('#/role')
+    await goto('#/group-management')
     expect(covering().length).toBeGreaterThan(0)
     await goto('#/')
     expect(covering()).toEqual([])
@@ -142,5 +142,78 @@ describe('stacked overlays', () => {
     expect(shown).toHaveLength(1)
     expect(shown[0].getAttribute('src')).toContain('TWOFACTOR.html')
     expect(get(popups)).toHaveLength(2)
+  })
+})
+
+describe('leaving an overlay by navigating', () => {
+  // A b1hybrid page that fails to load (a 404) has no script to call
+  // closePopup, so navigation is the only way out of it without a reload.
+  const deadOverlay = { id: 'x', src: 'http://core.test/b1hybrid/MISSING.html', isVisible: true } as any
+
+  it('closes on a route change', async () => {
+    popups.set([deadOverlay])
+    await tick()
+    expect(overlays()).toHaveLength(1)
+
+    await goto('#/account')
+    expect(get(popups)).toHaveLength(0)
+    expect(overlays()).toHaveLength(0)
+  })
+
+  it('closes on back / forward, which the app did not start', async () => {
+    await goto('#/account')
+    popups.set([deadOverlay])
+    await tick()
+
+    await goto('#/')
+    expect(overlays()).toHaveLength(0)
+  })
+
+  it('closes when navigating to the route already shown', async () => {
+    const { navigateToPath } = await import('../lib/utils/navigation')
+    popups.set([deadOverlay])
+    await tick()
+
+    navigateToPath('/')
+    await tick()
+    expect(overlays()).toHaveLength(0)
+  })
+})
+
+describe('an open overlay', () => {
+  const overlay = { id: 'y', src: 'http://core.test/b1hybrid/PAGE.html', isVisible: true } as any
+
+  it('hides the routed page, so a tall page cannot show beneath it', async () => {
+    const page = () => host.querySelector('[hidden]')
+    expect(page()).toBeNull()
+
+    popups.set([overlay])
+    await tick()
+    expect(page()).not.toBeNull()
+
+    popups.set([])
+    await tick()
+    expect(page()).toBeNull()
+  })
+
+  it('leaves the page shown while every overlay is hidden', async () => {
+    popups.set([{ ...overlay, isVisible: false }])
+    await tick()
+    expect(host.querySelector('[hidden]')).toBeNull()
+  })
+})
+
+describe('the offline-data notice', () => {
+  it('shows while the screen was answered locally, and clears on the next route', async () => {
+    const { usingLocalData } = await import('../stores/localData')
+    const notice = () => host.querySelector('[role="status"]')
+    expect(notice()).toBeNull()
+
+    usingLocalData.set(true)
+    await tick()
+    expect(notice()?.textContent).toContain('Nothing here was sent to the bank')
+
+    await goto('#/account')
+    expect(notice()).toBeNull()
   })
 })
